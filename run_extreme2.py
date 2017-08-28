@@ -8,10 +8,14 @@ import os
 import sys
 import argparse
 
+from extreme2.sequences import load_fasta_sequences
+
 def get_args():
     parser = argparse.ArgumentParser(description="Train model.",
                                      epilog='\n'.join(__doc__.strip().split('\n')[1:]).strip(),
                                      formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-i', '--input', required=True,
+                        help=('Input FASTA file'), type=str)
     parser.add_argument('-a', '--alph',
                         help=('Alphabet (default: dna)'),
                         type=str, choices=['dna', 'rna', 'protein'], default='dna')
@@ -23,6 +27,8 @@ def get_args():
 
 def main():
     args = get_args()
+    fasta_file = args.input
+    seqs = load_fasta_sequences(fasta_file)
 
 if __name__ == '__main__':
     main()
