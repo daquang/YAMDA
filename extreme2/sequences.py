@@ -2,36 +2,41 @@ import sys
 
 from itertools import chain
 import numpy as np
-import pyfasta
+from pyfaidx import Fasta
 
 
-def load_fasta_sequences(fasta_file):
+def load_fasta_sequences(fasta_file, alpha='dna'):
     """
-    Reads a FASTA file and returns letter sequences as list of numpy arrays
-    """
-    fasta = pyfasta.Fasta(fasta_file)
-    seqs = [np.array(fasta[k]) for k in fasta.iterkeys()]
-    return seqs
-
-def get_onehot_subsequence(seqs, W, alpha='dna'):
-    """
-    Extracts one hot coded subsequences from list of numpy array letter sequences.
-    Filters away subsequences overlapping invalid letters.
+    Reads a FASTA file and returns one-hot coded sequences as list of numpy arrays
     """
     if alpha=='dna':
         d = np.array(['A','C','G','T'])
     elif alpha=='rna':
         d = np.array(['A','C','G','U'])
     elif alpha=='protein':
-        d = np.array(['A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y'])
+        d = np.array(['A','C','D','E',
+                      'F','G','H','I',
+                      'K','L','M','N',
+                      'P','Q','R','S',
+                      'T','V','W','Y'])
     else:
         sys.exit(1)
-    seqs_onehot = [seq[:, np.newaxis]==d for seq in seqs]
-    subseqs_onehot = [[seq_onehot[i:i+W] for i in range(len(seq_onehot)-W+1)] 
-                      for seq_onehot in seqs_onehot]
-    subseqs_onehot = list(chain(*subseqs_onehot))
-    subseqs_onehot = np.array(subseqs_onehot)
-    # filter subsequences containing invalid letters
-    subseqs_onehot = subseqs_onehot[subseqs_onehot.sum(axis=(-1,-2))==W]
-    return subseqs_onehot
+    fasta = Fasta(fasta_file, as_raw=True)
+    seqs = [(d[:, np.newaxis] == np.array(list(seq[:]))).astype(np.uint8) for seq in fasta]
+    return seqs
+
+
+def get_subsequences(seqs, W):
+    """
+    Extracts W-length subsequences from list of one-hot coded
+    sequences.
+    Filters away subsequences overlapping invalid letters.
+    """
+    subseqs = [[seq[:,i:i+W] for i in range(seq.shape[1]-W+1)] 
+                for seq in seqs]
+    subseqs = list(chain(*subseqs))
+    subseqs = np.array(subseqs, dtype=np.uint8)
+    # filter away subsequences containing invalid letters
+    subseqs = subseqs[subseqs.sum(axis=(-1,-2))==W]
+    return subseqs
 
