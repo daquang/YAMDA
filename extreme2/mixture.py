@@ -8,7 +8,7 @@ import initialize
 import sequences
 
 class TCM:
-    def __init__(self, n_motifs, motif_width, alpha='dna', init='dirichlet'):
+    def __init__(self, n_motifs, motif_width, alpha='dna', init='subsequences'):
         self.n_motifs = n_motifs
         self.motif_width = motif_width
         self.alpha = alpha
@@ -47,6 +47,9 @@ class TCM:
         # Initialize PPMs
         if self.init == 'dirichlet':
             self.ppms = np.random.dirichlet(self.bg_probs, size=(self.n_motifs, self.motif_width))
+        elif self.init == 'subsequences'
+            self.ppms = X_subseqs_onehot[0:self.n_motifs].astype(np.float32) * 0.7
+            self.ppms[self.ppms==0] = 0.1
         else
             sys.exit(1)
         # Create torch model
