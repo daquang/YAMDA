@@ -1,4 +1,4 @@
-import sys 
+import sys
 
 import numpy as np
 import torch
@@ -53,7 +53,6 @@ class TCM:
         conv = nn.Conv1d(len(letter_frequency), self.n_motifs, self.motif_width)
         conv.weight.data = self.ppms
         # Initialize fractions
-        
         return self
 
     def transform(self, X):
