@@ -8,6 +8,8 @@ import os
 import sys
 import argparse
 
+import numpy
+
 from extreme2.sequences import load_fasta_sequences
 
 def get_args():
@@ -20,8 +22,13 @@ def get_args():
                         help=('Alphabet (default: dna)'),
                         type=str, choices=['dna', 'rna', 'protein'], default='dna')
     parser.add_argument('-p', '--pseudocount',
+<<<<<<< HEAD
                         help=('Pseudocount to prevent arithmetic underflow (default: 0.0001).'),
                         type=float, default=0.0001)
+=======
+                        help=('Pseudocount to add to motifs (default: 0.0001).'),
+                        type=float, default=0.0001)    
+>>>>>>> 17e86644d2f551257095a6bca4beffc48dae5a83
     parser.add_argument('-s', '--seed',
                         help=('Random seed for reproducibility (default: 1337).'),
                         type=int, default=1337)
@@ -30,7 +37,9 @@ def get_args():
 
 def main():
     args = get_args()
+    np.random.seed(args.seed)
     fasta_file = args.input
+    pseudo_count = args.pseudocount
     seqs = load_fasta_sequences(fasta_file)
 
 if __name__ == '__main__':
