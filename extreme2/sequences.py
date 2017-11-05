@@ -21,7 +21,7 @@ def load_fasta_sequences(fasta_file, alpha='dna'):
                       'T','V','W','Y'])
     else:
         sys.exit(1)
-    fasta = Fasta(fasta_file, as_raw=True)
+    fasta = Fasta(fasta_file, as_raw=True, sequence_always_upper=True)
     seqs = [(d[:, np.newaxis] == np.array(list(seq[:]))).astype(np.uint8) for seq in fasta]
     return seqs
 
@@ -39,4 +39,14 @@ def get_subsequences(seqs, W):
     # filter away subsequences containing invalid letters
     subseqs = subseqs[subseqs.sum(axis=(-1,-2))==W]
     return subseqs
+
+
+def pad_sequences(sequences, maxlen):
+    L = len(sequences[0])
+    num_samples = len(sequences)
+
+    x = np.zeros((num_samples, L, maxlen), dtype=np.uint8)
+    for idx, s in enumerate(sequences):
+        x[idx, :, :s.shape[1]] = s
+    return x
 
