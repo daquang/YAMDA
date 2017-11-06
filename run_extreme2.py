@@ -8,7 +8,7 @@ import os
 import sys
 import argparse
 
-import numpy
+import numpy as np
 import torch
 
 from extreme2.sequences import load_fasta_sequences
@@ -20,7 +20,7 @@ def get_args():
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-i', '--input', required=True,
                         help=('Input FASTA file'), type=str)
-    parser.add_argument('-b', '--batch-size', type=int, default=100,
+    parser.add_argument('-b', '--batchsize', type=int, default=100,
                         help='Input batch size for training (default: 100)')
     parser.add_argument('-a', '--alph',
                         help=('Alphabet (default: dna)'),
@@ -32,14 +32,14 @@ def get_args():
                         help=('Pseudocount to prevent arithmetic underflow (default: 0.0001).'),
                         type=float, default=0.0001)
     parser.add_argument('-w', '--width',
-                        help=('Motif width (default: 20).'),
-                        type=int, default=20)
+                        help=('Motif width (default: 25).'),
+                        type=int, default=25)
     parser.add_argument('-n', '--nmotif',
                         help=('Number of motifs to find (default: 1).'),
                         type=int, default=1)
     parser.add_argument('-ns', '--nseeds',
-                        help=('Number of motif seeds to try (default: 10000).'),
-                        type=int, default=10000)
+                        help=('Number of motif seeds to try (default: 1000).'),
+                        type=int, default=1000)
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='Disable the default CUDA training.')
     parser.add_argument('-s', '--seed',
@@ -54,7 +54,13 @@ def main():
     cuda = not args.no_cuda and torch.cuda.is_available()
     fasta_file = args.input
     pseudo_count = args.pseudocount
+    motif_width = args.width
+    min_sites = 100
+    batch_size = args.batchsize
+    n_seeds = args.nseeds
     seqs = load_fasta_sequences(fasta_file)
+    model = TCM(n_seeds, motif_width, min_sites, batch_size, cuda, init='subsequences')
+    model.fit(seqs)
 
 if __name__ == '__main__':
     main()
