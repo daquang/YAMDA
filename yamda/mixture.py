@@ -102,11 +102,11 @@ class TCM:
                 ratios = torch.exp(log_ratios)
                 #state_probs = fracs / (fracs + (1 - fracs) * ratios)
                 state_probs = 1 / (1 + (1 / fracs - 1) * ratios)
-                counts += state_probs.sum(dim=0)
-                pfms += (state_probs.unsqueeze(-1) *
-                         x.data.unsqueeze(1)).sum(dim=0)
-                pfms_bg += ((1 - state_probs.unsqueeze(-1)) *
-                             x.data.unsqueeze(1)).sum(dim=0)
+                counts.add_(state_probs.sum(dim=0))
+                pfms.add_((state_probs.unsqueeze(-1) *
+                         x.data.unsqueeze(1)).sum(dim=0))
+                pfms_bg.add_(((1 - state_probs.unsqueeze(-1)) *
+                             x.data.unsqueeze(1)).sum(dim=0))
             # M-step, update parameters
             fracs = (counts / M).unsqueeze(0)
             ppms = pfms / counts.unsqueeze(2)
@@ -135,7 +135,7 @@ class TCM:
                 x = x.cuda()
             ppms_prob = torch.exp(m_ppms(x)).data
             ppms_prob_bg = torch.exp(m_ppms_bg(x)).data
-            log_likelihoods += torch.log(fracs*ppms_prob + (1-fracs)*ppms_prob_bg).sum(dim=0).view(-1)
+            log_likelihoods.add_(torch.log(fracs*ppms_prob + (1-fracs)*ppms_prob_bg).sum(dim=0).view(-1))
         return log_likelihoods
 
     def _online_e_step(self):
