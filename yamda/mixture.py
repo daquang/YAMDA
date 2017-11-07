@@ -76,7 +76,7 @@ class TCM:
         m.weight.data = torch.log(ppms_bg) - torch.log(ppms)
         fracs = fracs.view((1, n_filters, 1))
         pfms = torch.zeros((n_filters, L, W))
-        pfms_bg = torch.zeros((n_filters, L))
+        pfms_bg = torch.zeros((n_filters, L, W))
         counts = torch.zeros((n_filters,1))
         if self.cuda:
             m.cuda()
@@ -106,11 +106,11 @@ class TCM:
                 pfms += (state_probs.unsqueeze(-1) *
                          x.data.unsqueeze(1)).sum(dim=0)
                 pfms_bg += ((1 - state_probs.unsqueeze(-1)) *
-                             x.data.unsqueeze(1)).sum(dim=0).sum(dim=-1)
+                             x.data.unsqueeze(1)).sum(dim=0)
             # M-step, update parameters
             fracs = (counts / M).unsqueeze(0)
             ppms = pfms / counts.unsqueeze(2)
-            ppms_bg = (pfms_bg /
+            ppms_bg = (pfms_bg.sum(dim=-1) /
                        (W * (M - counts))).unsqueeze(2).expand(n_filters, L, W)
             log_likelihoods = self._compute_log_likelihood(X, ppms, ppms_bg, fracs)
         fracs = fracs.view(-1)
