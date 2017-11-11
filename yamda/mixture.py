@@ -82,16 +82,13 @@ class TCM:
             m.cuda()
             pfms = pfms.cuda()
             pfms_bg = pfms_bg.cuda()
+            counts = counts.cuda()
         for i in range(epochs):
             # E-step, compute membership weights and letter frequencies
-            pfms[:] = 0
-            pfms_bg[:] = 0
-            counts[:] = 0
-            if self.cuda:
-                m.cuda()
-                pfms = pfms.cuda()
-                pfms_bg = pfms_bg.cuda()
-                counts = counts.cuda()
+            pfms.zero_()
+            pfms_bg.zero_()
+            counts.zero_()
+            fracs_ratio = (1 - fracs) / fracs
             for j in trange(0, M, self.batch_size):
                 batch = X[j:j+self.batch_size]
                 batch_size = len(batch)
@@ -101,12 +98,13 @@ class TCM:
                 log_ratios = m(x).data
                 ratios = torch.exp(log_ratios)
                 #state_probs = fracs / (fracs + (1 - fracs) * ratios)
-                state_probs = 1 / (1 + (1 / fracs - 1) * ratios)
+                #state_probs = 1 / (1 + (1 / fracs - 1) * ratios)
+                state_probs = 1 / (1 + fracs_ratio * ratios)
                 counts.add_(state_probs.sum(dim=0))
                 pfms.add_((state_probs.unsqueeze(-1) *
-                         x.data.unsqueeze(1)).sum(dim=0))
+                           x.data.unsqueeze(1)).sum(dim=0))
                 pfms_bg.add_(((1 - state_probs.unsqueeze(-1)) *
-                             x.data.unsqueeze(1)).sum(dim=0))
+                               x.data.unsqueeze(1)).sum(dim=0))
             # M-step, update parameters
             fracs = (counts / M).unsqueeze(0)
             ppms = pfms / counts.unsqueeze(2)

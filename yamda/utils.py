@@ -22,8 +22,7 @@ def save_model(dirname, model, clobber):
             else:
                 print(('output directory (%s) already exists '
                        'so it will be clobbered') % dirname)
-    
-
+    return
 
 
 def save_meme(fname, ppms, nsites=None, alpha='dna'):
@@ -84,6 +83,9 @@ def load_meme(fname):
     num_lines = len(lines)
     i = 0
     ppms = []
+    identifiers = []
+    names = []
+    nsites_list = []
     d = None
     while i < num_lines:
         line = lines[i]
@@ -91,6 +93,9 @@ def load_meme(fname):
             alpha_str = line.split()[-1].strip()
             d = np.array(list(alpha_str))
         if 'MOTIF' in line:
+            name_info = line.split()
+            identifier = name_info[1]
+            name = name_info[2]
             while 'letter-probability matrix' not in line:
                 i += 1
                 line = lines[i]
@@ -98,6 +103,8 @@ def load_meme(fname):
             motif_info = motif_info.split()
             w_index = motif_info.index('w=') + 1
             w = int(motif_info[w_index])
+            nsites_index = motif_info.index('nsites=') + 1
+            nsites = int(motif_info[nsites_index])
             motif = np.zeros((len(d), w))
             i += 1
             line = lines[i]
@@ -109,6 +116,9 @@ def load_meme(fname):
                 i += 1
             ppm = np.dot(motif, np.diag(1/motif.sum(axis=0)))
             ppms.append(ppm)
+            nsites_list.append(nsites)
+            names.append(name)
+            identifiers.append(identifier)
         i += 1
-    return ppms, d
+    return ppms, d, names, identifiers, nsites_list
 
