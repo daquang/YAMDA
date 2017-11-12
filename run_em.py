@@ -34,7 +34,7 @@ def get_args():
     parser.add_argument('-w', '--width',
                         help='Motif width (default: 25).',
                         type=int, default=25)
-    parser.add_argument('-n', '--nmotif',
+    parser.add_argument('-n', '--nmotifs',
                         help='Number of motifs to find (default: 1).',
                         type=int, default=1)
     parser.add_argument('-mins', '--minsites',
@@ -63,8 +63,9 @@ def main():
     min_sites = args.minsites
     batch_size = args.batchsize
     n_seeds = args.nseeds
-    seqs = load_fasta_sequences(fasta_file, alpha)
-    model = TCM(n_seeds, motif_width, min_sites, batch_size, cuda, init='subsequences')
+    seqs = load_fasta_sequences(fasta_file)
+    model = TCM(n_seeds, motif_width, min_sites, batch_size, alpha, cuda, 
+                init='subsequences')
     model.fit(seqs)
 
 if __name__ == '__main__':

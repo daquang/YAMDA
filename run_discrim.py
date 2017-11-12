@@ -32,11 +32,11 @@ def get_args():
                         help='Alphabet (default: dna)',
                         type=str, choices=['dna', 'rna', 'protein'], default='dna')
     parser.add_argument('-w', '--width',
-                        help='Motif width (default: 20).',
-                        type=int, default=20)
-    parser.add_argument('-n', '--nmotif',
-                        help='Number of motifs to find (default: 1).',
-                        type=int, default=1)
+                        help='Motif width (default: 25).',
+                        type=int, default=25)
+    parser.add_argument('-n', '--nmotifs',
+                        help='Number of motifs to find (default: 16).',
+                        type=int, default=16)
     parser.add_argument('--no_cuda', action='store_true', default=False,
                         help='Disable the default CUDA training.')
     parser.add_argument('-s', '--seed',
@@ -52,11 +52,13 @@ def main():
     cuda = not args.no_cuda and torch.cuda.is_available()
     alpha = args.alpha
     revcomp = args.revcomp
+    motif_width = args.width
+    n_motifs = args.nmotifs
     fasta_file = args.input
     fasta_file2 = args.input2
-    pos_seqs = load_fasta_sequences(fasta_file, alpha)
-    neg_seqs = load_fasta_sequences(fasta_file2, alpha)
-    model = SeqDiscrim()
+    pos_seqs = load_fasta_sequences(fasta_file)
+    neg_seqs = load_fasta_sequences(fasta_file2)
+    model = SeqDiscrim(n_motifs, motif_width, alpha)
     model.fit(pos_seqs, neg_seqs)
 
 

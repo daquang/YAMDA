@@ -11,11 +11,12 @@ from . import sequences
 
 class TCM:
     def __init__(self, n_seeds, motif_width, min_sites,
-                 batch_size, cuda=True, init='subsequences'):
+                 batch_size, alpha, cuda, init):
         self.n_seeds = n_seeds
         self.motif_width = motif_width
         self.min_sites = min_sites
         self.batch_size = batch_size
+        self.alpha = alpha
         self.cuda = cuda
         self.init = init
 
@@ -23,7 +24,7 @@ class TCM:
         """Fit the model to the data X. Discover one motif.
         Parameters
         ----------
-        X : {list of one hot encoded numpy arrays}
+        X : {list of string sequences}
             Training data.
         Returns
         -------
@@ -31,10 +32,11 @@ class TCM:
             The fitted model.
         """
         N = len(X)
+        X = sequences.encode(X, self.alpha)
         min_sites = self.min_sites
         max_sites = N # Expect at most one motif occurrence per sequence
         # Extract valid one-hot subsequences
-        X = sequences.get_subsequences(X, self.motif_width)
+        X = sequences.get_onehot_subsequences(X, self.motif_width)
         M, L, W = X.shape
         # Compute background frequencies
         letter_frequency = X.sum(axis=(0,2))
