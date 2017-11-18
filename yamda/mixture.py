@@ -64,7 +64,7 @@ class TCM:
             if self.cuda:
                 fracs_seeds = fracs_seeds.cuda()
             ppms_seeds_i, ppms_bg_seeds_i, fracs_seeds_i, ll_i = \
-                self._batch_em(X, ppms_seeds, ppms_bg_seeds, fracs_seeds, 1)
+                self._batch_em(X, ppms_seeds, ppms_bg_seeds, fracs_seeds, 10)
             sites_i *= 2
         return self
 
@@ -93,7 +93,6 @@ class TCM:
             fracs_ratio = (1 - fracs) / fracs
             for j in trange(0, M, self.batch_size):
                 batch = X[j:j+self.batch_size]
-                batch_size = len(batch)
                 x = Variable(torch.from_numpy(batch).float())
                 if self.cuda:
                     x = x.cuda()
@@ -113,6 +112,7 @@ class TCM:
             ppms_bg = (pfms_bg.sum(dim=-1) /
                        (W * (M - counts))).unsqueeze(2).expand(n_filters, L, W)
             log_likelihoods = self._compute_log_likelihood(X, ppms, ppms_bg, fracs)
+            print(log_likelihoods.max())
         fracs = fracs.view(-1)
         return ppms, ppms_bg, fracs, log_likelihoods
 
@@ -121,21 +121,31 @@ class TCM:
         n_filters = len(ppms)
         m_ppms = nn.Conv1d(L, n_filters, W, bias=False)
         m_ppms.weight.data = torch.log(ppms)
-        m_ppms_bg = nn.Conv1d(L, n_filters, W, bias=False)
-        m_ppms_bg.weight.data = torch.log(ppms_bg)
+        #m_ppms_bg = nn.Conv1d(L, n_filters, W, bias=False)
+        #m_ppms_bg.weight.data = torch.log(ppms_bg)
+        m_ratios = nn.Conv1d(L, n_filters, W, bias=False)
+        m_ratios.weight.data = torch.log(ppms_bg) - torch.log(ppms)
         log_likelihoods = torch.zeros(n_filters)
+        fracs_ratio = (1 - fracs) / fracs
+        log_fracs = torch.log(fracs)
         if self.cuda:
             m_ppms.cuda()
-            m_ppms_bg.cuda()
+            #m_ppms_bg.cuda()
             log_likelihoods = log_likelihoods.cuda()
+            m_ratios.cuda()
         for j in trange(0, M, self.batch_size):
             batch = X[j:j+self.batch_size]
             x = Variable(torch.from_numpy(batch).float())
             if self.cuda:
                 x = x.cuda()
-            ppms_prob = torch.exp(m_ppms(x)).data
-            ppms_prob_bg = torch.exp(m_ppms_bg(x)).data
-            log_likelihoods.add_(torch.log(fracs*ppms_prob + (1-fracs)*ppms_prob_bg).sum(dim=0).view(-1))
+            #ppms_prob = torch.exp(m_ppms(x)).data
+            #ppms_prob_bg = torch.exp(m_ppms_bg(x)).data
+            #log_likelihoods.add_(torch.log(fracs*ppms_prob + (1-fracs)*ppms_prob_bg).sum(dim=0).view(-1))
+            ppms_logprob = m_ppms(x).data
+            #ppms_logprob_bg = m_ppms_bg(x).data
+            log_ratios = m_ratios(x).data
+            ratios = torch.exp(log_ratios)
+            log_likelihoods.add_((log_fracs + ppms_logprob + torch.log(1 + fracs_ratio * ratios)).sum(dim=0).view(-1))
         return log_likelihoods
 
     def _online_e_step(self):

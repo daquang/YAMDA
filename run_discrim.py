@@ -26,7 +26,7 @@ def get_args():
     parser.add_argument('-r', '--revcomp', action='store_true', default=False,
                         help='Consider both the given strand and the reverse complement strand when searching for '
                              'motifs in a complementable alphabet (default: consider given strand only).')
-    parser.add_argument('-b', '--batch-size', type=int, default=100,
+    parser.add_argument('-b', '--batch_size', type=int, default=100,
                         help='Input batch size for training (default: 100)')
     parser.add_argument('-a', '--alpha',
                         help='Alphabet (default: dna)',
@@ -51,6 +51,7 @@ def main():
     np.random.seed(args.seed)
     cuda = not args.no_cuda and torch.cuda.is_available()
     alpha = args.alpha
+    batch_size = args.batch_size
     revcomp = args.revcomp
     motif_width = args.width
     n_motifs = args.nmotifs
@@ -58,7 +59,7 @@ def main():
     fasta_file2 = args.input2
     pos_seqs = load_fasta_sequences(fasta_file)
     neg_seqs = load_fasta_sequences(fasta_file2)
-    model = SeqDiscrim(n_motifs, motif_width, alpha)
+    model = SeqDiscrim(n_motifs, motif_width, batch_size, alpha, cuda)
     model.fit(pos_seqs, neg_seqs)
 
 
