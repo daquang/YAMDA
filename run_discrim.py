@@ -9,9 +9,12 @@ import sys
 import argparse
 
 import numpy as np
-import torch
+import random as rn
+import tensorflow as tf
+
 from yamda.sequences import load_fasta_sequences
 from yamda.discrim import SeqDiscrim
+from yamda.utils import save_meme
 
 def get_args():
     parser = argparse.ArgumentParser(description="Train model.",
@@ -26,8 +29,13 @@ def get_args():
     parser.add_argument('-r', '--revcomp', action='store_true', default=False,
                         help='Consider both the given strand and the reverse complement strand when searching for '
                              'motifs in a complementable alphabet (default: consider given strand only).')
+    parser.add_argument('-t', '--test_size', type=float, default=None,
+                        help='Fraction of sequences to set aside for testing (default: Use all data for '
+                             'training and testing).')
     parser.add_argument('-b', '--batch_size', type=int, default=100,
                         help='Input batch size for training (default: 100)')
+    parser.add_argument('-e', '--epochs', type=int, default=100,
+                        help='Number of training epochs (default: 100)')
     parser.add_argument('-a', '--alpha',
                         help='Alphabet (default: dna)',
                         type=str, choices=['dna', 'rna', 'protein'], default='dna')
@@ -40,8 +48,8 @@ def get_args():
     parser.add_argument('--no_cuda', action='store_true', default=False,
                         help='Disable the default CUDA training.')
     parser.add_argument('-s', '--seed',
-                        help='Random seed for reproducibility (default: 1337).',
-                        type=int, default=1337)
+                        help='Random seed for reproducibility (default: 1).',
+                        type=int, default=1)
     args = parser.parse_args()
     return args
 
@@ -49,9 +57,14 @@ def get_args():
 def main():
     args = get_args()
     np.random.seed(args.seed)
-    cuda = not args.no_cuda and torch.cuda.is_available()
+    os.environ['PYTHONHASHSEED'] = '0'
+    rn.seed(args.seed)
+    tf.set_random_seed(args.seed)
+    cuda = True
     alpha = args.alpha
+    test_size = args.test_size
     batch_size = args.batch_size
+    epochs = args.epochs
     revcomp = args.revcomp
     motif_width = args.width
     n_motifs = args.nmotifs
@@ -59,8 +72,9 @@ def main():
     fasta_file2 = args.input2
     pos_seqs = load_fasta_sequences(fasta_file)
     neg_seqs = load_fasta_sequences(fasta_file2)
-    model = SeqDiscrim(n_motifs, motif_width, batch_size, alpha, cuda)
-    model.fit(pos_seqs, neg_seqs)
+    model = SeqDiscrim(n_motifs, motif_width, test_size, batch_size, epochs, alpha, revcomp, cuda)
+    ppms, nsites = model.fit(pos_seqs, neg_seqs)
+    save_meme('motifs.txt', ppms, nsites, alpha)
 
 
 if __name__ == '__main__':

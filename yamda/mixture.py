@@ -11,14 +11,15 @@ from . import sequences
 
 class TCM:
     def __init__(self, n_seeds, motif_width, min_sites,
-                 batch_size, alpha, cuda, init):
+                 batch_size, alpha, revcomp, init, cuda):
         self.n_seeds = n_seeds
         self.motif_width = motif_width
         self.min_sites = min_sites
         self.batch_size = batch_size
         self.alpha = alpha
-        self.cuda = cuda
+        self.revcomp = revcomp
         self.init = init
+        self.cuda = cuda
 
     def fit(self, X):
         """Fit the model to the data X. Discover one motif.
@@ -40,6 +41,9 @@ class TCM:
         M, L, W = X.shape
         # Compute background frequencies
         letter_frequency = X.sum(axis=(0,2))
+        if self.revcomp: # If reverse complements considered, complement letter frequencies set to same value
+            letter_frequency[[0, 3]] = letter_frequency[0] + letter_frequency[3]
+            letter_frequency[[1, 2]] = letter_frequency[1] + letter_frequency[2]
         bg_probs = 1.0 * letter_frequency / letter_frequency.sum()
         ppms_bg_seeds = bg_probs.reshape([1, L, 1]).repeat(
                             self.n_seeds, axis=0).astype(np.float32)
@@ -64,24 +68,21 @@ class TCM:
             if self.cuda:
                 fracs_seeds = fracs_seeds.cuda()
             ppms_seeds_i, ppms_bg_seeds_i, fracs_seeds_i, ll_i = \
-                self._batch_em(X, ppms_seeds, ppms_bg_seeds, fracs_seeds, 10)
+                self._batch_em(X, ppms_seeds, ppms_bg_seeds, fracs_seeds, 1)
             sites_i *= 2
-        return self
 
-    def transform(self, X):
-        return
 
     def _batch_em(self, X, ppms, ppms_bg, fracs, epochs):
         M, L, W = X.shape
         n_filters = len(ppms)
-        m = nn.Conv1d(L, n_filters, W, bias=False)
-        m.weight.data = torch.log(ppms_bg) - torch.log(ppms)
+        m_log_ratios = nn.Conv1d(L, n_filters, W, bias=False)
+        m_log_ratios.weight.data = torch.log(ppms_bg) - torch.log(ppms)
         fracs = fracs.view((1, n_filters, 1))
         pfms = torch.zeros((n_filters, L, W))
         pfms_bg = torch.zeros((n_filters, L, W))
-        counts = torch.zeros((n_filters,1))
+        counts = torch.zeros((n_filters, 1))
         if self.cuda:
-            m.cuda()
+            m_log_ratios.cuda()
             pfms = pfms.cuda()
             pfms_bg = pfms_bg.cuda()
             counts = counts.cuda()
@@ -96,10 +97,8 @@ class TCM:
                 x = Variable(torch.from_numpy(batch).float())
                 if self.cuda:
                     x = x.cuda()
-                log_ratios = m(x).data
+                log_ratios = m_log_ratios(x).data
                 ratios = torch.exp(log_ratios)
-                #state_probs = fracs / (fracs + (1 - fracs) * ratios)
-                #state_probs = 1 / (1 + (1 / fracs - 1) * ratios)
                 state_probs = 1 / (1 + fracs_ratio * ratios)
                 counts.add_(state_probs.sum(dim=0))
                 pfms.add_((state_probs.unsqueeze(-1) *
@@ -112,49 +111,35 @@ class TCM:
             ppms_bg = (pfms_bg.sum(dim=-1) /
                        (W * (M - counts))).unsqueeze(2).expand(n_filters, L, W)
             log_likelihoods = self._compute_log_likelihood(X, ppms, ppms_bg, fracs)
-            print(log_likelihoods.max())
         fracs = fracs.view(-1)
         return ppms, ppms_bg, fracs, log_likelihoods
 
     def _compute_log_likelihood(self, X, ppms, ppms_bg, fracs):
         M, L, W = X.shape
         n_filters = len(ppms)
-        m_ppms = nn.Conv1d(L, n_filters, W, bias=False)
-        m_ppms.weight.data = torch.log(ppms)
-        #m_ppms_bg = nn.Conv1d(L, n_filters, W, bias=False)
-        #m_ppms_bg.weight.data = torch.log(ppms_bg)
-        m_ratios = nn.Conv1d(L, n_filters, W, bias=False)
-        m_ratios.weight.data = torch.log(ppms_bg) - torch.log(ppms)
+        m_log_ppms = nn.Conv1d(L, n_filters, W, bias=False)
+        m_log_ppms.weight.data = torch.log(ppms)
+        m_log_ratios = nn.Conv1d(L, n_filters, W, bias=False)
+        m_log_ratios.weight.data = torch.log(ppms_bg) - torch.log(ppms)
         log_likelihoods = torch.zeros(n_filters)
         fracs_ratio = (1 - fracs) / fracs
         log_fracs = torch.log(fracs)
         if self.cuda:
-            m_ppms.cuda()
-            #m_ppms_bg.cuda()
+            m_log_ppms.cuda()
             log_likelihoods = log_likelihoods.cuda()
-            m_ratios.cuda()
+            m_log_ratios.cuda()
         for j in trange(0, M, self.batch_size):
             batch = X[j:j+self.batch_size]
             x = Variable(torch.from_numpy(batch).float())
             if self.cuda:
                 x = x.cuda()
-            #ppms_prob = torch.exp(m_ppms(x)).data
-            #ppms_prob_bg = torch.exp(m_ppms_bg(x)).data
-            #log_likelihoods.add_(torch.log(fracs*ppms_prob + (1-fracs)*ppms_prob_bg).sum(dim=0).view(-1))
-            ppms_logprob = m_ppms(x).data
-            #ppms_logprob_bg = m_ppms_bg(x).data
-            log_ratios = m_ratios(x).data
+            ppms_logprob = m_log_ppms(x).data
+            log_ratios = m_log_ratios(x).data
             ratios = torch.exp(log_ratios)
             log_likelihoods.add_((log_fracs + ppms_logprob + torch.log(1 + fracs_ratio * ratios)).sum(dim=0).view(-1))
         return log_likelihoods
 
     def _online_e_step(self):
-        return
-
-    def _online_m_step(self):
-        #ct is (10, 10, 4) samples tensor
-        #at is (5, 10, 4) motifs tensor
-        #dt = torch.mm(ct.view(10,40),at.view(5,40).transpose(1,0))
         return
 
     def sample(self, n_samples=1):

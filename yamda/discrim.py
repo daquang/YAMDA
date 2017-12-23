@@ -1,56 +1,22 @@
-"""
-from keras import backend as K
 from keras.models import Model
-from keras.layers import Lambda, Dense, Dropout, Activation, Flatten, Layer, merge, Input, Convolution1D, MaxPooling1D
-from keras.layers.pooling import GlobalMaxPooling1D
-"""
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.autograd import Variable
-import numpy as np
+from keras.layers import Conv1D, GlobalMaxPool1D, Input, Dense, Lambda, Maximum
+from keras import backend as K
 from tqdm import trange
-from sklearn.utils import shuffle
+import numpy as np
+from sklearn.model_selection import train_test_split
 
 from . import sequences
 
 
-class Net(nn.Module):
-    def __init__(self, L, n_motifs, motif_width, revcomp=False):
-        super(Net, self).__init__()
-        self.revcomp = revcomp
-        self.conv = nn.Conv1d(L, n_motifs, motif_width)
-        self.dense = nn.Linear(n_motifs, 1)
-        # Initialization
-        nn.init.kaiming_normal(self.conv.weight.data)
-        self.conv.bias.data.zero_()
-        nn.init.xavier_normal(self.dense.weight.data)
-        self.dense.bias.data.zero_()
-
-    def forward(self, x):
-        x_fwd = x
-        x_fwd = self.conv(x_fwd)
-        x_fwd = x_fwd.max(dim=2, keepdim=False)[0]
-        x_fwd = F.relu(x_fwd)
-        x_fwd = self.dense(x_fwd)
-        output = F.sigmoid(x_fwd)
-        return output
-    
-    @staticmethod
-    def _flip(x, dim):
-        dim = x.dim() + dim if dim < 0 else dim
-        return x[tuple(slice(None, None) if i != dim
-                 else torch.arange(x.size(i)-1, -1, -1).long()
-                 for i in range(x.dim()))]
-
-
 class SeqDiscrim():
-    def __init__(self, n_motifs, motif_width, batch_size, alpha, cuda):
+    def __init__(self, n_motifs, motif_width, test_size, batch_size, epochs, alpha, revcomp, cuda):
         self.n_motifs = n_motifs
         self.motif_width = motif_width
+        self.test_size = test_size
         self.batch_size = batch_size
+        self.epochs = epochs
         self.alpha = alpha
+        self.revcomp = revcomp
         self.cuda = cuda
         self.model = None
 
@@ -65,93 +31,84 @@ class SeqDiscrim():
         X_pos = sequences.pad_onehot_sequences(X_pos, max_seq_len)
         X_neg = sequences.pad_onehot_sequences(X_neg, max_seq_len)
         X = np.vstack([X_pos, X_neg])
-        N, L, _ = X.shape
-        Y = np.zeros((N, 1), dtype=np.uint8)
-        Y[:len(X_pos), 0] = 1
-        self.model = Net(L, self.n_motifs, self.motif_width)
-        if self.cuda:
-            self.model.cuda()
-        self._train(X, Y)
-        """
-        if True:
-            self.model = self._make_model(max_seq_len, L)
-            self.model.compile('adam', 'binary_crossentropy', metrics=['accuracy'])
-            self.model.summary()
-            X = X.transpose((0,2,1))
-        self.model.fit(X,Y,batch_size=100,epochs=100,verbose=1,shuffle=True)
-        """
-    
-    def _train(self, X, Y, epochs=100):
-        self.model.train()
-        N = len(X)
-        optimizer = optim.SGD(self.model.parameters(), lr=0.1, momentum=0)
-        #optimizer = optim.Adam(self.model.parameters(), lr=0.01)
-        for i in range(epochs):
-            X, Y = shuffle(X, Y)
-            cum_loss = 0
-            cum_acc = 0
-            pbar = trange(0, N, self.batch_size)
-            k = 0
-            for j in pbar:
-                x = X[j:j+self.batch_size]
-                y = Y[j:j+self.batch_size]
-                x = torch.from_numpy(x).float()
-                y = torch.from_numpy(y).float()
-                if self.cuda:
-                    x = x.cuda()
-                    y = y.cuda()
-                x, y = Variable(x), Variable(y)
-                optimizer.zero_grad()
-                output = self.model(x)
-                predicts = output.round()
-                acc = (predicts.eq(y).sum()).data[0] / len(y)
-                cum_acc += acc
-                loss = F.binary_cross_entropy(output, y)
-                cum_loss += loss.data[0]
-                loss.backward()
-                optimizer.step()
-                if k % 5 == 0:
-                    pbar.set_description('Epoch %i/%i - loss: %0.4f acc: %0.4f' % (i+1, epochs, cum_loss / (k+1), cum_acc / (k+1)))
-                k += 1
-                
-        
-    """
-    @staticmethod
-    def _get_output(input_layer, hidden_layers):
-        output = input_layer
-        for hidden_layer in hidden_layers:
-            output = hidden_layer(output)
-        return output
-    """
+        N, A, L = X.shape
+        y = np.zeros((N, 1), dtype=np.uint8)
+        y[:len(X_pos), 0] = 1
+        if self.test_size is None:
+            X_train = X
+            y_train = y
+            X_test = X
+            y_test = y
+        else:
+            X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                                stratify=y,
+                                                                test_size=self.test_size)
+        self.conv_layer, self.model = self._make_model(A, L)
+        self._train(X_train, y_train)
+        ppms, nsites = self._filters_to_ppms(X_pos)
+        return ppms, nsites
 
-    """
-    def _make_model(self, max_seq_len, L):
-        conv_layer = torch.nn.Conv1d(L, self.n_motifs, self.motif_width)
-        n_scanpoints = max_seq_len - self.motif_width + 1
-        dense_layer = torch.nn.Linear(n_scanpoints, 1)
-        model_fwd = torch.nn.Sequential(
-          conv_layer,
-          torch.nn.ReLU(),
-          torch.nn.MaxPool1d(n_scanpoints),
-          
-          torch.nn.Linear(H, D_out),
-        )
-        rc_layer = Lambda(lambda x: x[:,::-1,::-1])
-        hidden_layers = [
-            Convolution1D(filters=self.n_motifs,
-                          kernel_size=self.motif_width,
-                          padding='valid',
-                          activation='relu'),
-            GlobalMaxPooling1D(),
-            Dense(1, activation='sigmoid')
-        ]
-        forward_input = Input(shape=(max_seq_len, L,))
-        reverse_input = rc_layer(forward_input)
-        output = self._get_output(forward_input, hidden_layers)
-        model = Model(input=[forward_input], output=output)
-        return model_fwd
-        """
+    def _make_model(self, A, L):
+        input_layer = Input((L, A))
+        conv_layer = Conv1D(filters=self.n_motifs,
+                            kernel_size=self.motif_width,
+                            strides=1,
+                            padding='valid',
+                            activation='relu')
+        pool_layer = GlobalMaxPool1D()
+        sigmoid_layer = Dense(1,
+                              activation='sigmoid')
+
+        rev_comp_layer = Lambda(lambda x: x[:, ::-1, ::-1])
+
+        output_fwd = conv_layer(input_layer)
+        output_fwd = pool_layer(output_fwd)
+        output_fwd = sigmoid_layer(output_fwd)
+
+        if self.revcomp:
+            output_rev = conv_layer(rev_comp_layer(input_layer))
+            output_rev = pool_layer(output_rev)
+            output_rev = sigmoid_layer(output_rev)
+
+            output = Maximum()([output_fwd, output_rev])
+        else:
+            output = output_fwd
+
+        model = Model([input_layer], [output])
+
+        model.compile(loss='binary_crossentropy',
+                      optimizer='adam',
+                      metrics=['accuracy'])
+        return conv_layer, model
+
+    def _train(self, X, y):
+        X = X.transpose(0, 2, 1)
+        self.model.fit(X, y,
+                  batch_size=100,
+                  epochs=self.epochs,
+                  shuffle=True)
+
+    def _filters_to_ppms(self, X):
+        N, A, L = X.shape
+        X = X.transpose(0, 2, 1)
+        pfms = np.zeros((self.n_motifs, self.motif_width, A))
+        nsites = np.zeros(self.n_motifs)
+
+        conv_output = self.conv_layer.get_output_at(0)
+        f = K.function([self.model.input], [K.argmax(conv_output, axis=1), K.max(conv_output, axis=1)])
+        pbar = trange(0, N, self.batch_size)
+        for i in pbar:
+            x_batch = X[i:i + self.batch_size]
+            max_acts_pos_batch, max_acts_batch = f([x_batch])
+            max_acts_batch_bool = max_acts_batch > 0
+            for m in range(self.n_motifs):
+                for n in range(len(x_batch)):
+                    if max_acts_batch_bool[n, m]:
+                        nsites[m] += 1
+                        pfms[m] += x_batch[n, max_acts_pos_batch[n, m]:max_acts_pos_batch[n, m] + self.motif_width, :]
+        ppms = pfms / pfms.sum(axis=2, keepdims=True)
+        ppms = ppms.transpose(0, 2, 1)
+        return ppms, nsites
 
     def transform(self, X):
         return
-

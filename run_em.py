@@ -25,6 +25,9 @@ def get_args():
     parser.add_argument('-a', '--alpha',
                         help='Alphabet (default: dna)',
                         type=str, choices=['dna', 'rna', 'protein'], default='dna')
+    parser.add_argument('-r', '--revcomp', action='store_true', default=False,
+                        help='Consider both the given strand and the reverse complement strand when searching for '
+                             'motifs in a complementable alphabet (default: consider given strand only).')
     parser.add_argument('-m', '--model',
                         help='Model (default: tcm)',
                         type=str, choices=['tcm', 'zoops', 'oops'], default='tcm')
@@ -58,14 +61,15 @@ def main():
     cuda = not args.no_cuda and torch.cuda.is_available()
     fasta_file = args.input
     alpha = args.alpha
+    revcomp = args.revcomp
     pseudo_count = args.pseudocount
     motif_width = args.width
     min_sites = args.minsites
     batch_size = args.batchsize
     n_seeds = args.nseeds
     seqs = load_fasta_sequences(fasta_file)
-    model = TCM(n_seeds, motif_width, min_sites, batch_size, alpha, cuda, 
-                init='subsequences')
+    model = TCM(n_seeds, motif_width, min_sites, batch_size, alpha, revcomp,
+                init='subsequences', cuda=cuda)
     model.fit(seqs)
 
 if __name__ == '__main__':

@@ -9,7 +9,7 @@ def load_fasta_sequences(fasta_file):
     """
     Reads a FASTA file and returns list of string sequences
     """
-    fasta = Fasta(fasta_file, as_raw=True, sequence_always_upper=True)
+    fasta = Fasta(fasta_file, sequence_always_upper=True)
     seqs = [str(seq) for seq in fasta]
     fasta.close()
     return seqs
@@ -29,10 +29,26 @@ def encode(seqs, alpha='dna'):
                       'T', 'V', 'W', 'Y'])
     else:
         sys.exit(1)
-    seqs = [(d[:, np.newaxis] == np.array(list(seq[:]))).astype(np.uint8) 
+    seqs = [(d[:, np.newaxis] == np.array(list(seq))).astype(np.uint8)
             for seq in seqs]
     return seqs
 
+
+def decode(seqs, alpha='dna'):
+    if alpha == 'dna':
+        d = np.array(['N', 'A', 'C', 'G', 'T'])
+    elif alpha == 'rna':
+        d = np.array(['N', 'A', 'C', 'G', 'U'])
+    elif alpha == 'protein':
+        d = np.array(['X', 'A', 'C', 'D', 'E',
+                           'F', 'G', 'H', 'I',
+                           'K', 'L', 'M', 'N',
+                           'P', 'Q', 'R', 'S',
+                           'T', 'V', 'W', 'Y'])
+    else:
+        sys.exit(1)
+    seqs = [''.join(d[seq.max(axis=0) + seq.argmax(axis=0)]) for seq in seqs]
+    return seqs
 
 def get_onehot_subsequences(seqs, W):
     """
