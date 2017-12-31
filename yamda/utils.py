@@ -2,27 +2,30 @@
 
 import numpy as np
 
+import pickle
 import sys
 import os
+import errno
 
 
 def load_model():
     return
 
 
-def save_model(dirname, model, clobber):
+def save_model(dirname, model, overwrite):
     try:
         os.makedirs(dirname)
     except OSError as exc:
         if exc.errno == errno.EEXIST:
-            if not clobber:
-                print(('output directory (%s) already exists '
-                       'but you specified not to clobber it') % dirname)
+            if not overwrite:
+                print(('Output directory (%s) already exists '
+                       'but you specified not to overwrite it') % dirname)
                 sys.exit(1)
             else:
-                print(('output directory (%s) already exists '
-                       'so it will be clobbered') % dirname)
-    return
+                print(('Output directory (%s) already exists '
+                       'so it will be overwritten') % dirname)
+    save_meme(dirname + '/motifs.txt', model.ppms_, model.n_sites_, model.alpha)
+    pickle.dump(model, open(dirname + '/model.pkl', 'wb'))
 
 
 def save_meme(fname, ppms, nsites=None, alpha='dna'):
@@ -121,4 +124,5 @@ def load_meme(fname):
             identifiers.append(identifier)
         i += 1
     return ppms, d, names, identifiers, nsites_list
+
 

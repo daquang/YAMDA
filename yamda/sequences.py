@@ -3,16 +3,33 @@ import sys
 from itertools import chain
 import numpy as np
 from pyfaidx import Fasta
+from tqdm import tqdm
+import re
 
-
-def load_fasta_sequences(fasta_file):
+def load_fasta_sequences(fasta_file, return_keys=False):
     """
     Reads a FASTA file and returns list of string sequences
     """
-    fasta = Fasta(fasta_file, sequence_always_upper=True)
-    seqs = [str(seq) for seq in fasta]
+    fasta = Fasta(fasta_file, as_raw=True, sequence_always_upper=True)
+    seqs = [seq[:] for seq in fasta]
+    if return_keys:
+        keys = list(fasta.keys())
     fasta.close()
+    if return_keys:
+        return seqs, keys
     return seqs
+
+
+def save_fasta(fname, seqs, seq_names=None):
+    seqs_file = open(fname, 'w')
+    for i in range(len(seqs)):
+        if seq_names is None:
+            seq_name = 'sequence' + str(i)
+        else:
+            seq_name = seq_names[i]
+        seqs_file.write('>' + seq_name + '\n')
+        seqs_file.write(seqs[i] + '\n')
+    seqs_file.close()
 
 
 def encode(seqs, alpha='dna'):
@@ -45,8 +62,6 @@ def decode(seqs, alpha='dna'):
                            'K', 'L', 'M', 'N',
                            'P', 'Q', 'R', 'S',
                            'T', 'V', 'W', 'Y'])
-    else:
-        sys.exit(1)
     seqs = [''.join(d[seq.max(axis=0) + seq.argmax(axis=0)]) for seq in seqs]
     return seqs
 
@@ -65,11 +80,38 @@ def get_onehot_subsequences(seqs, W):
     return subseqs
 
 
-def pad_onehot_sequences(seqs, maxlen):
+def pad_onehot_sequences(seqs, maxlen, center=True):
     L = len(seqs[0])
     num_samples = len(seqs)
     x = np.zeros((num_samples, L, maxlen), dtype=np.uint8)
     for idx, s in enumerate(seqs):
-        x[idx, :, :s.shape[1]] = s
+        if center:
+            start = int(maxlen / 2 - s.shape[1] / 2)
+            stop = start + s.shape[1]
+        else:
+            start = 0
+            stop = s.shape[1]
+        x[idx, :, start:stop] = s
     return x
 
+
+def erase_subsequences(seqs, annoying_subsequences):
+    new_seqs = []
+    annoying_subsequences_listed = [list(s) for s in annoying_subsequences]
+    for seq in tqdm(seqs, desc='Erasing annoying sequences'):
+        seq_l = list(seq)
+        for s in annoying_subsequences:
+            slen = len(s)
+            replace_s = ['N'] * slen
+            for m in re.finditer('(?=' + s + ')', seq):
+                start = m.start()
+                seq_l[start:start+slen] = replace_s
+        new_seq = ''.join(seq_l)
+        new_seqs.append(new_seq)
+    return new_seqs
+
+def get_rc(re):
+    """
+    Return the reverse complement of a DNA/RNA RE.
+    """
+    return re.translate(str.maketrans('ACGTURYKMBVDHSWN', 'TGCAAYRMKVBHDSWN'))[::-1]
