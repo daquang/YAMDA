@@ -1,2 +1,2 @@
-![alt text](https://raw.githubusercontent.com/daquang/YAMDA/master/logo/logoYAMDA.png?token=ADRfUL5jTDggaSruTZ3Z0mIWAAclXxUnks5afSN6wA%3D%3D | width=100)
+![alt text](https://raw.githubusercontent.com/daquang/YAMDA/master/logo/logoYAMDA.png?token=ADRfUL5jTDggaSruTZ3Z0mIWAAclXxUnks5afSN6wA%3D%3D){:height="50%" width="50%"}
 
