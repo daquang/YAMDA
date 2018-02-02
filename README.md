@@ -1,2 +1,2 @@
-![alt text](https://raw.githubusercontent.com/daquang/YAMDA/master/logo/logoYAMDA.jpg?token=ADRfULyKndnDXNg0Pem0lUfs-3Z52qiNks5afSM7wA%3D%3D "Fast GPU-enabled motif discovery")
+![alt text](https://raw.githubusercontent.com/daquang/YAMDA/master/logo/logoYAMDA.png?token=ADRfUL5jTDggaSruTZ3Z0mIWAAclXxUnks5afSN6wA%3D%3D "Fast GPU-enabled motif discovery")
 
