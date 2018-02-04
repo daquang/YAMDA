@@ -18,7 +18,7 @@ Daniel Quang, Yuanfang Guan, Stephen Parker; YAMDA: a highly scalable GPU-accele
 
 ---
 
-** Installation
+## Installation
 
 YAMDA relies on several open source Python packages.
 
@@ -28,3 +28,19 @@ to download and install [Anaconda] (https://www.continuum.io) (4.3.1). I listed 
 used, but the latest versions should be fine. If you're curious as to what packages in Anaconda are used, they are:
 [numpy] (http://www.numpy.org/) (1.10.4), [scipy] (http://www.scipy.org/) (0.17.0). Standard python packages are:
 sys, os, errno, argparse, pickle and itertools.
+
+### Optional
+These are software packages and Python libraries that are not necessary to run YAMDA, but are nevertheless recommended.
+
+* biopython
+```
+conda install -c anaconda biopython
+```
+
+## To-Do
+* Docker installation
+* Test YAMDA on RNA and protein sequences
+* Python 2.7 compatibility
+* Cythonize the seeding step
+* Add ZOOPS model
+* Add OOPS
