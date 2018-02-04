@@ -110,6 +110,7 @@ def erase_subsequences(seqs, annoying_subsequences):
         new_seqs.append(new_seq)
     return new_seqs
 
+
 def get_rc(re):
     """
     Return the reverse complement of a DNA/RNA RE.

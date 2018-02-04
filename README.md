@@ -31,7 +31,10 @@ sys, os, errno, argparse, pickle and itertools.
 
 ### Optional
 These are software packages and Python libraries that are not necessary to run YAMDA, but are nevertheless recommended.
+They contain extra utilities that can extend the functionality of YAMDA or help preprocess data. Once again, I've put
+links and version numbers of what I used, but any recent version of these packages should be fine.
 
+* [http://meme-suite.org/ The MEME suite] (4.12.0). Appropriately enough, the MEME suite
 * biopython
 ```
 conda install -c anaconda biopython

@@ -28,8 +28,8 @@ class SeqDiscrim():
             max_seq_len = max(max_seq_len, len(x))
         X_pos = sequences.encode(X_pos, self.alpha)
         X_neg = sequences.encode(X_neg, self.alpha)
-        X_pos = sequences.pad_onehot_sequences(X_pos, max_seq_len)
-        X_neg = sequences.pad_onehot_sequences(X_neg, max_seq_len)
+        X_pos = sequences.pad_onehot_sequences(X_pos, max_seq_len, center=False)
+        X_neg = sequences.pad_onehot_sequences(X_neg, max_seq_len, center=False)
         X = np.vstack([X_pos, X_neg])
         N, A, L = X.shape
         y = np.zeros((N, 1), dtype=np.uint8)
