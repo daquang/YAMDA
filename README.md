@@ -5,6 +5,9 @@ A highly scalable GPU-accelerated *de novo* motif discovery software package
 Daniel Quang, Yuanfang Guan, Stephen Parker; YAMDA: a highly scalable GPU-accelerated *de novo* motif discovery 
 software package; (in preparation).
 
+Please post in the Issues board or e-mail me (daquang@umich.edu) if you have any questions, suggestions, or complaints 
+:)
+
 ---
 
 ## Table of Contents
@@ -13,10 +16,10 @@ software package; (in preparation).
     * [Optional dependencies](#optional-dependencies)
     * [Docker](#docker)
 * [Examples](#examples)
-    * [Making a masked genome FASTA]
-    * [Extracting BED interval FASTA sequences]
-    * [*De novo* motif discovery in ChIP-seq]
-    * [*De novo* motif discovery in DGF]
+    * [Making a masked genome FASTA](#making-a-masked-genome-fasta)
+    * [Extracting BED interval FASTA sequences](#extracting-bed-interval-fasta-sequences)
+    * [*De novo* motif discovery in ChIP-seq](#*de-novo*-motif-discovery-in-chip-seq)
+    * [*De novo* motif discovery in DGF](#*de-novo*-motif-discovery-in-dgf)
 * [To-Do](#to-do)
 
 ---
@@ -89,9 +92,30 @@ Coming soon.
 ---
 
 ## Examples
+In the examples folder, you will find the narrowPeak and masked FASTA files that are needed to reproduce results in the 
+manuscript. For your convenience, I have included the major preprocessing steps that typically comprise a *de novo* 
+motif discovery pipeline.
 ### Making a masked genome FASTA
+Motif discovery for DNA usually performs better on a FASTA sequence set with all repetitive sequences masked. This is 
+typically accomplished by first generating a masked genome where all repetitive sequence residues are replaced with 
+capital N's. The following command lines will download masked hg19 chromosome FASTA files, assemble the individual 
+files into a single FASTA file (hg19.fa.masked), and remove all intermediate files:
+```
+wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/bigZips/chromFaMasked.tar.gz
+tar zxvf chromFaMasked.tar.gz
+cat chr*.fa.masked >> hg19.fa.masked
+rm chr*.fa.masked chromFaMasked.tar.gz
+```
 ### Extracting BED interval FASTA sequences
+BEDTools' fastaFromBed utility is useful for extracting letter sequences from a reference fasta file based on feature 
+coordinates. The following command lines demonstrate how to do this from an ENCODE narrowPeak file to generate 100 bp 
+sequences centered on summits. For simplicity, we will use the same masked genome FASTA file generated in the previous 
+example.
+```
+fastaFromBed
+```
 ### *De novo* motif discovery in ChIP-seq
+This example demonstrates. The fasta-shuffle-letters utility from the MEME-suite is useful for this purpose. Note that to run this example, you do not necessarily need to run the previous examples as 
 ### *De novo* motif discovery in DGF
 
 ---

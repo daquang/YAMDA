@@ -4,8 +4,6 @@ Script for training model.
 Use `run_em.py -h` to see an auto-generated description of advanced options.
 """
 
-import os
-import sys
 import argparse
 
 import numpy as np
@@ -14,6 +12,7 @@ import torch
 from yamda.sequences import load_fasta_sequences, save_fasta
 from yamda.mixture import TCM
 from yamda.utils import save_model
+
 
 def get_args():
     parser = argparse.ArgumentParser(description="Train model.",
@@ -37,9 +36,9 @@ def get_args():
     parser.add_argument('-e', '--erasewhole', action='store_true', default=False,
                         help='Erase an entire sequence if it contains a discovered motif '
                              '(default: erase individual motif occurrences).')
-    parser.add_argument('-p', '--pmin',
-                        help='Minimum letter proability. Helps prevent underflow (default: 1e-4).',
-                        type=float, default=1e-4)
+    parser.add_argument('-f', '--fudge',
+                        help='Fudge factor to help with extremely rare motifs. Should be >0 and <=1 (default: 0.1).',
+                        type=float, default=0.1)
     parser.add_argument('-w', '--width',
                         help='Motif width (default: 20).',
                         type=int, default=20)
@@ -61,8 +60,8 @@ def get_args():
                              'search) or 1000 (for randomly sampled subsequence method).',
                         type=int, default=None)
     parser.add_argument('-maxiter', '--maxiter',
-                        help='Maximum number of refining iterations of batch/on-line EM to run from any starting '
-                             'point. Batch/on-line EM is run for maxiter iterations or until convergence (see '
+                        help='Maximum number of refining iterations of batch EM to run from any starting '
+                             'point. Batch EM is run for maxiter iterations or until convergence (see '
                              '-tolerance, below) from each starting point for refining (default: 20)',
                         type=int, default=20)
     parser.add_argument('-t', '--tolerance',
@@ -96,7 +95,8 @@ def main():
     if alpha == 'protein' and revcomp:
         revcomp = False
         print('You specified reverse complement, but proteins lack reverse complements!')
-    pmin = args.pmin
+    fudge = args.fudge
+    assert 0 < fudge <= 1
     half_length = args.halflength
     motif_width = args.width
     min_sites = args.minsites
@@ -117,7 +117,7 @@ def main():
         seqs_neg = load_fasta_sequences(neg_fasta_file)
         if n_seeds is None:
             n_seeds = 100
-    model = TCM(n_seeds, n_motifs, motif_width, min_sites, max_sites, batch_size, half_length, pmin, alpha, revcomp,
+    model = TCM(n_seeds, n_motifs, motif_width, min_sites, max_sites, batch_size, half_length, fudge, alpha, revcomp,
                 tolerance, maxiter, erasewhole, cuda)
     seqs, seqs_neg = model.fit(seqs, seqs_neg)
     if args.outputdir is None:
@@ -135,4 +135,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

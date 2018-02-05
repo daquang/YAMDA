@@ -28,8 +28,8 @@ def main():
     annoying_subsequences = [
         'AAAAAA',
         'TTTTTT',
-        'CCCCGCCCC',
-        'GGGGCGGGG'
+        'CCCGCCC',
+        'GGGCGGG'
     ]
     seqs = erase_subsequences(seqs, annoying_subsequences)
     save_fasta(output_file, seqs, keys)
