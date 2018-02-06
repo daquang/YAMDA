@@ -129,15 +129,18 @@ zcat Examples/wgEncodeAwgTfbsHaibH1hescPou5f1sc9081V0416102UniPk.narrowPeak.gz |
 ```
 ### *De novo* motif discovery in ChIP-seq
 This example demonstrates motif discovery on the H1 POU5F1 ChIP-seq data. YAMDA requires a positive FASTA file
-and a negative FASTA file. The latter is typically a dinucleotide-shuffled control version of the postive file. The 
+and a negative FASTA file. The latter is typically a dinucleotide-shuffled control version of the positive file. The 
 fasta-shuffle-letters utility from the MEME-suite is useful for this purpose. 
+
+```
+fasta-shuffle-letters -kmer 2 -s 0 Examples/H1_POU5F1_ChIP_HAIB.fa.masked H1_POU5F1_ChIP_HAIB_shuffled.fa.masked
+```
 
 The run_em.py script executes the motif discovery program on the FASTA pairs. Use `python run_em.py -h` to get a 
 detailed description of the script's arguments. Note that to run this example, you do not necessarily need to run the 
 previous examples because all the necessary files have already been prepackaged with this repository. 
 
 ```
-fasta-shuffle-letters -kmer 2 -s 0 Examples/H1_POU5F1_ChIP_HAIB.fa.masked H1_POU5F1_ChIP_HAIB_shuffled.fa.masked
 python run_em.py -r -e -i Examples/H1_POU5F1_ChIP_HAIB.fa.masked -j Examples/H1_POU5F1_ChIP_HAIB_shuffled.fa.masked -oc H1_POU5F1_output 
 ```
 
