@@ -33,7 +33,7 @@ git clone https://github.com/daquang/YAMDA.git
 
 Or download a stable release version (v0.1.0 should reproduce the paper's results exactly):
 ```
-
+wget https://github.com/daquang/YAMDA/archive/0.1.0.tar.gz
 ```
 
 YAMDA relies on several open source software packages. Links and version numbers for the packages used to develop and
