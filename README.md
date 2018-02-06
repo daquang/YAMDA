@@ -25,6 +25,16 @@ Please post in the Issues board or e-mail me (daquang@umich.edu) if you have any
 ---
 
 ## Installation
+Clone a copy of the YAMDA repository:
+
+```
+git clone https://github.com/daquang/YAMDA.git
+```
+
+Or download a stable release version (v0.1.0 should reproduce the paper's results exactly):
+```
+
+```
 
 YAMDA relies on several open source software packages. Links and version numbers for the packages used to develop and
 test YAMDA are listed below; however, typically any recent version of these packages should be fine for running YAMDA. 
@@ -52,7 +62,9 @@ pip install tqdm
 * [PyTorch](http://pytorch.org/) (0.3.0). Tensor computation library from Facebook AI that forms the backbone of YAMDA. 
 Both GPU and CPU versions are supported. It is recommended you check out the official 
 [PyTorch website](http://pytorch.org) for foolproof methods of installation for specific operating systems and hardware 
-configurations. Otherwise, the following tl;dr command line should work most of the time.
+configurations.
+
+**tl;dr**, the following command line should work most of the time for installing PyTorch.
 ```
 conda install pytorch torchvision -c pytorch 
 ```
@@ -95,6 +107,7 @@ Coming soon.
 In the examples folder, you will find the narrowPeak and masked FASTA files that are needed to reproduce results in the 
 manuscript. For your convenience, I have included the major preprocessing steps that typically comprise a *de novo* 
 motif discovery pipeline.
+
 ### Making a masked genome FASTA
 Motif discovery for DNA usually performs better on a FASTA sequence set with all repetitive sequences masked. This is 
 typically accomplished by first generating a masked genome where all repetitive sequence residues are replaced with 
@@ -108,15 +121,57 @@ rm chr*.fa.masked chromFaMasked.tar.gz
 ```
 ### Extracting BED interval FASTA sequences
 BEDTools' fastaFromBed utility is useful for extracting letter sequences from a reference fasta file based on feature 
-coordinates. The following command lines demonstrate how to do this from an ENCODE narrowPeak file to generate 100 bp 
-sequences centered on summits. For simplicity, we will use the same masked genome FASTA file generated in the previous 
-example.
+coordinates. The following command lines demonstrate how to do this from an ENCODE narrowPeak file (H1 POU5F1) to 
+generate 100 bp sequences centered on peak summits. For simplicity, we will use the same masked genome FASTA file 
+generated in the previous example.
 ```
-fastaFromBed
+zcat Examples/wgEncodeAwgTfbsHaibH1hescPou5f1sc9081V0416102UniPk.narrowPeak.gz | awk -v "OFS=\t" '{print $1,$2 + $10 - 50,$2 + $10 + 50}' | fastaFromBed -bed stdin -fi hg19.fa.masked -fo Examples/H1_POU5F1_ChIP_HAIB.fa.masked
 ```
 ### *De novo* motif discovery in ChIP-seq
-This example demonstrates. The fasta-shuffle-letters utility from the MEME-suite is useful for this purpose. Note that to run this example, you do not necessarily need to run the previous examples as 
+This example demonstrates motif discovery on the H1 POU5F1 ChIP-seq data. YAMDA requires a positive FASTA file
+and a negative FASTA file. The latter is typically a dinucleotide-shuffled control version of the postive file. The 
+fasta-shuffle-letters utility from the MEME-suite is useful for this purpose. 
+
+The run_em.py script executes the motif discovery program on the FASTA pairs. Use `python run_em.py -h` to get a 
+detailed description of the script's arguments. Note that to run this example, you do not necessarily need to run the 
+previous examples because all the necessary files have already been prepackaged with this repository. 
+
+```
+fasta-shuffle-letters -kmer 2 -s 0 Examples/H1_POU5F1_ChIP_HAIB.fa.masked H1_POU5F1_ChIP_HAIB_shuffled.fa.masked
+python run_em.py -r -e -i Examples/H1_POU5F1_ChIP_HAIB.fa.masked -j Examples/H1_POU5F1_ChIP_HAIB_shuffled.fa.masked -oc H1_POU5F1_output 
+```
+
+The output folder H1_POU5F1_output contains the following files:
+
+* model.pkl. A saved/pickled version of the learned mixture model.
+* motifs.txt. The discovered motif(s) in Minimal MEME format. This file can be further processed with MEME utilities 
+such as meme2images and TOMTOM.
+* positive_seqs.fa. A FASTA of the positive sequences with all instances of the discovered motif(s) erased.
+* negative_seqs.fa. A FASTA of the negative sequences with all instances of the discovered motif(s) erased.
+
 ### *De novo* motif discovery in DGF
+This example demonstrates motif discovery on the K562 Digital Genomic Footprinting dataset. This is the same example 
+from [EXTREME](https://github.com/uci-cbcl/EXTREME).
+
+Motif discovery in DGF is similar to motif discovery in ChIP-seq; however, due to the rarity of motifs in DGF datasets, 
+we found that it helps to erase all overlapping instances of repetitive sequences such as AAAAAA/TTTTTT and 
+CCCGCCC/GGGCGGG:
+
+
+```
+python erase_annoying_sequences.py -i Examples/K562_DNase.fa -o Examples/K562_DNase_eraseannoying.fa
+fasta-shuffle-letters -kmer 2 -dna -seed 0 Examples/K562_DNase_eraseannoying.fa Examples/K562_DNase_eraseannoying_shuffled.fa
+```
+
+Now we can run the YAMDA algorithm on the FASTA file:
+```
+python run_em.py -f 0.1 -r -e -maxs 20000 -i Examples/K562_DNase_eraseannoying.fa -j Examples/K562_DNase_eraseannoying_shuffled.fa -oc K562_DNase_output
+```
+
+The -f argument is one of the most difficult, yet perhaps most important, arguments. The closest corresponding argument 
+in MEME is wnsites. The closer the -f argument is to zeros, the stronger the bias towards motifs with exactly the 
+expected number of sites. The default value of 0.1 works well for most ChIP-seq and some DGF datasets, but in cases of 
+even rarer motifs smaller values (e.g. 0.025) is necessary.
 
 ---
 
