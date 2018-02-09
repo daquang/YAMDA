@@ -1,4 +1,4 @@
-![alt text](https://raw.githubusercontent.com/daquang/YAMDA/master/logo/logoYAMDA.jpg?token=ADRfUF9JObmq5QPrx0wpIk4d7D-8HnLgks5afSfawA%3D%3D "Fast GPU-accelerated motif discovery")
+![YAMDA](https://github.com/daquang/YAMDA/raw/master/logo/logoYAMDA.jpg "Fast GPU-accelerated motif discovery")
 
 A highly scalable GPU-accelerated *de novo* motif discovery software package
 
@@ -31,9 +31,9 @@ Clone a copy of the YAMDA repository:
 git clone https://github.com/daquang/YAMDA.git
 ```
 
-Or download a stable release version (v0.1.0 should reproduce the paper's results exactly):
+Or download a stable release version (v0.0.1 should reproduce the paper's results exactly):
 ```
-wget https://github.com/daquang/YAMDA/archive/0.1.0.tar.gz
+wget https://github.com/daquang/YAMDA/archive/0.0.1.tar.gz
 ```
 
 YAMDA relies on several open source software packages. Links and version numbers for the packages used to develop and
