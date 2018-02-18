@@ -1,4 +1,4 @@
-![YAMDA](https://github.com/daquang/YAMDA/raw/master/logo/logoYAMDA.jpg "Fast GPU-accelerated motif discovery")
+![YAMDA](https://github.com/daquang/YAMDA/raw/master/logo/logo.jpg "Fast GPU-accelerated motif discovery")
 
 A highly scalable GPU-accelerated *de novo* motif discovery software package
 
