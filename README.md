@@ -1,4 +1,6 @@
-<img src="https://github.com/daquang/YAMDA/raw/master/logo/logo.jpg" width="400">
+<p align="center">
+<img src="https://github.com/daquang/YAMDA/raw/master/logo/logo.jpg" width="300">
+</p>
 <!---
 ![YAMDA](https://github.com/daquang/YAMDA/raw/master/logo/logo.jpg "Fast GPU-accelerated motif discovery")
 -->
