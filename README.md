@@ -1,7 +1,8 @@
-<img src="https://github.com/daquang/YAMDA/raw/master/logo/logo.jpg" width="500">
+<img src="https://github.com/daquang/YAMDA/raw/master/logo/logo.jpg" width="400">
 <!---
 ![YAMDA](https://github.com/daquang/YAMDA/raw/master/logo/logo.jpg "Fast GPU-accelerated motif discovery")
 -->
+
 A highly scalable GPU-accelerated *de novo* motif discovery software package
 
 Daniel Quang, Yuanfang Guan, Stephen Parker; YAMDA: a highly scalable GPU-accelerated *de novo* motif discovery 
