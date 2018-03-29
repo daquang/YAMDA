@@ -7,8 +7,7 @@
 
 A highly scalable GPU-accelerated *de novo* motif discovery software package
 
-Daniel Quang, Yuanfang Guan, Stephen Parker; YAMDA: a highly scalable GPU-accelerated *de novo* motif discovery 
-software package; (in preparation).
+Daniel Quang, Yuanfang Guan, Stephen Parker; YAMDA: thousandfold speedup of EM-based motif discovery using deep learning libraries and GPU; (in preparation).
 
 Please post in the Issues board or e-mail me (daquang@umich.edu) if you have any questions, suggestions, or complaints 
 :)
