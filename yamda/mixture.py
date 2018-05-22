@@ -124,7 +124,7 @@ class TCM:
             ppms_seeds = ppms_seeds[indices]
             # Select seed that yields highest log likelihood after one online and one batch EM passes
             max_log_likelihoods, max_log_likelihoods_index = log_likelihoods.max(dim=0)
-            max_log_likelihoods_index = max_log_likelihoods_index[0]
+            max_log_likelihoods_index = max_log_likelihoods_index.item()  # Replaced [0] w/ .item() for PyTorch >= 0.4
             word_seed_best = sequences.decode(
                 [ppms_seeds_original[max_log_likelihoods_index].round().astype(np.uint8)], self.alpha)[0]
             print('Using seed originating from word: ' + word_seed_best)

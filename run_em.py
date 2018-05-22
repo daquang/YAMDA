@@ -100,7 +100,9 @@ def main():
     half_length = args.halflength
     motif_width = args.width
     min_sites = args.minsites
+    assert min_sites > 0
     max_sites = args.maxsites
+    assert max_sites is None or max_sites >= min_sites
     batch_size = args.batchsize
     erasewhole = args.erasewhole
     tolerance = args.tolerance
