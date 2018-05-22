@@ -7,14 +7,13 @@
 
 A highly scalable GPU-accelerated *de novo* motif discovery software package
 
-Daniel Quang, Yuanfang Guan, Stephen Parker; YAMDA: thousandfold speedup of EM-based motif discovery using deep learning libraries and GPU; (Bioinformatics, in press).
-
 Please post in the Issues board or e-mail me (daquang@umich.edu) if you have any questions, suggestions, or complaints 
 :)
 
 ---
 
 ## Table of Contents
+* [Citation](#citation)
 * [Installation](#installation)
     * [Required dependencies](#required-dependencies)
     * [Optional dependencies](#optional-dependencies)
@@ -28,6 +27,25 @@ Please post in the Issues board or e-mail me (daquang@umich.edu) if you have any
 
 ---
 
+## Citation
+
+```
+@article{doi:10.1093/bioinformatics/bty396,
+author = {Quang, Daniel and Guan, Yuanfang and Parker, Stephen C J},
+title = {YAMDA: thousandfold speedup of EM-based motif discovery using deep learning libraries and GPU},
+journal = {Bioinformatics},
+volume = {},
+number = {},
+pages = {bty396},
+year = {2018},
+doi = {10.1093/bioinformatics/bty396},
+URL = {http://dx.doi.org/10.1093/bioinformatics/bty396},
+eprint = {/oup/backfile/content_public/journal/bioinformatics/pap/10.1093_bioinformatics_bty396/1/bty396.pdf}
+}
+```
+
+---
+
 ## Installation
 Clone a copy of the YAMDA repository:
 
@@ -35,19 +53,19 @@ Clone a copy of the YAMDA repository:
 git clone https://github.com/daquang/YAMDA.git
 ```
 
-Or download a stable release version (v0.0.1 should reproduce the paper's results exactly):
+Or download a stable release version (v0.1 should reproduce the paper's results exactly):
 ```
-wget https://github.com/daquang/YAMDA/archive/0.0.1.tar.gz
+wget https://github.com/daquang/YAMDA/archive/0.1.tar.gz
 ```
 
 YAMDA relies on several open source software packages. Links and version numbers for the packages used to develop and
 test YAMDA are listed below; however, typically any recent version of these packages should be fine for running YAMDA. 
-The best and easiest way to install all dependencies is with [Anaconda](https://www.anaconda.com/) (5.0.1, Python 3.6 
+The best and easiest way to install all dependencies is with [Anaconda](https://www.anaconda.com/) (5.1, Python 3.6 
 version). Anaconda uses pre-built binaries for specific operating systems to allow simple installation of Python and 
-non-Python software packages. macOS High Sierra or Ubuntu 16.04 is recommended.
+non-Python software packages. macOS High Sierra or Ubuntu 18.04 is recommended.
 
 ### Required dependencies
-* [Python](https://www.python.org) (3.6.4). I chose Python 3.6 instead of Python 2.7 for initial YAMDA development
+* [Python](https://www.python.org) (3.6.5). I chose Python 3.6 instead of Python 2.7 for initial YAMDA development
 because the latter will  no longer be supported in 2020. YAMDA imports the following standard Python packages:
 sys, os, errno, re, argparse, pickle, and itertools.
 * [numpy](http://www.numpy.org/) (1.13.3). Python scientific computing library. Comes pre-packaged in Anaconda.
@@ -63,7 +81,7 @@ command line:
 ```
 pip install tqdm
 ```
-* [PyTorch](http://pytorch.org/) (0.3.0). Tensor computation library from Facebook AI that forms the backbone of YAMDA. 
+* [PyTorch](http://pytorch.org/) (0.4.0). Tensor computation library from Facebook AI that forms the backbone of YAMDA. 
 Both GPU and CPU versions are supported. It is recommended you check out the official 
 [PyTorch website](http://pytorch.org) for foolproof methods of installation for specific operating systems and hardware 
 configurations.
@@ -80,7 +98,7 @@ links and version numbers of what I used, but any recent version of these packag
 
 * [The MEME suite](http://meme-suite.org/) (4.12.0). Appropriately enough, the MEME suite has many tools for 
 processing FASTA and motif files. Among these are the fasta-shuffle-letters utility, which is useful for generating 
-negative controls. MEME can also be installed easily enough through Anaconda:
+negative controls. MEME can also be installed easily enough from its main website or through Anaconda:
 ```
 conda install -c bioconda meme 
 ```
@@ -95,7 +113,7 @@ files compressed.
 ```
 conda install -c anaconda biopython
 ```
-* [BEDTools](http://bedtools.readthedocs.io/en/latest/) (0.7.10). Standard BEDTools suite is useful for extracing FASTA 
+* [BEDTools](http://bedtools.readthedocs.io/en/latest/) (0.7.10). Standard BEDTools suite is useful for extracting FASTA 
 sequences from BED files. Since I also needed the pybedtools wrapper library, I installed BEDTools with the following 
 conda command:
 ```
@@ -183,9 +201,11 @@ even rarer motifs smaller values (e.g. 0.025) is necessary.
 ---
 
 ## To-Do
+Here are a list of features I plan to add. They will be added according to demand.
 * Docker installation
 * Test YAMDA on RNA and protein sequences
 * Python 2.7 compatibility
-* Cythonize seeding step
+* Cythonize seeding step and reduce its memory overhead
+* Add more examples (e.g. SELEX data)
 * Add ZOOPS model
 * Add OOPS model
