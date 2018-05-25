@@ -21,8 +21,8 @@ Please post in the Issues board or e-mail me (daquang@umich.edu) if you have any
 * [Examples](#examples)
     * [Making a masked genome FASTA](#making-a-masked-genome-fasta)
     * [Extracting BED interval FASTA sequences](#extracting-bed-interval-fasta-sequences)
-    * [*De novo* motif discovery in ChIP-seq](#*de-novo*-motif-discovery-in-chip-seq)
-    * [*De novo* motif discovery in DGF](#*de-novo*-motif-discovery-in-dgf)
+    * [Motif discovery in ChIP-seq](#motif-discovery-in-chip-seq)
+    * [Motif discovery in DGF](#motif-discovery-in-dgf)
 * [To-Do](#to-do)
 
 ---
@@ -149,7 +149,7 @@ generated in the previous example.
 ```
 zcat Examples/wgEncodeAwgTfbsHaibH1hescPou5f1sc9081V0416102UniPk.narrowPeak.gz | awk -v "OFS=\t" '{print $1,$2 + $10 - 50,$2 + $10 + 50}' | fastaFromBed -bed stdin -fi hg19.fa.masked -fo Examples/H1_POU5F1_ChIP_HAIB.fa.masked
 ```
-### *De novo* motif discovery in ChIP-seq
+### Motif discovery in ChIP-seq
 This example demonstrates motif discovery on the H1 POU5F1 ChIP-seq data. YAMDA requires a positive FASTA file
 and a negative FASTA file. The latter is typically a dinucleotide-shuffled control version of the positive file. The 
 fasta-shuffle-letters utility from the MEME-suite is useful for this purpose. 
@@ -174,7 +174,7 @@ such as meme2images and TOMTOM.
 * positive_seqs.fa. A FASTA of the positive sequences with all instances of the discovered motif(s) erased.
 * negative_seqs.fa. A FASTA of the negative sequences with all instances of the discovered motif(s) erased.
 
-### *De novo* motif discovery in DGF
+### Motif discovery in DGF
 This example demonstrates motif discovery on the K562 Digital Genomic Footprinting dataset. This is the same example 
 from [EXTREME](https://github.com/uci-cbcl/EXTREME).
 
