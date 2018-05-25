@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Script for training model.
 Use `run_em.py -h` to see an auto-generated description of advanced options.
