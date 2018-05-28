@@ -124,7 +124,7 @@ conda install -c bioconda pybedtools
 
 #### Anaconda Install
 ```bash
-cd /tmp && wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh -O ./anaconda3.sh && bash ./anaconda3.sh -u -b -p $HOME/anaconda3 && export PATH="$HOME/anaconda3/bin:$PATH" && cd -;
+cd /tmp && wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh -O ./anaconda3.sh && bash ./anaconda3.sh -u -b -p /opt/anaconda3 && export PATH="/opt/anaconda3/bin:$PATH" && cd -;
 ```
 
 #### Install Detailed
@@ -138,7 +138,7 @@ conda env create -f environment.yml && . activate YAMDA-env;
 ```
 
 #### Exit Env
-`exit`
+`source deactivate`
 
 #### Kill Env
 `conda env remove --name YAMDA-env`
