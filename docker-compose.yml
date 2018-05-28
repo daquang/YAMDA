@@ -1,0 +1,13 @@
+version: "3"                                                                                                                                                              
+services:
+ 
+     yamda-dock:
+         image: yamda-dock:latest
+         network_mode: "host"
+         env_file: .env
+         build:
+             context: "."
+             dockerfile: "./Dockerfile"
+             args:
+                 - YAMDA_EXAMPLE_VAR
+

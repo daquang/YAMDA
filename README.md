@@ -120,8 +120,45 @@ conda command:
 conda install -c bioconda pybedtools
 ```
 
+### Streamlined
+
+#### Anaconda Install
+```bash
+cd /tmp && wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh -O ./anaconda3.sh && bash ./anaconda3.sh -u -b -p $HOME/anaconda3 && export PATH="$HOME/anaconda3/bin:$PATH" && cd -;
+```
+
+#### Install Detailed
+```bash
+conda update -yn base conda && conda update -y --prefix $HOME/anaconda3 anaconda && conda create -fmy -c defaults -c anaconda -c conda-forge -c bioconda -c pytorch -n YAMDA-env python=3.6.5 numpy=1.13.3 scipy=0.19.1 pyfaidx tqdm pytorch torchvision meme anaconda biopython pybedtools && source activate YAMDA-env;
+```
+
+#### Install Easy
+```bash
+conda env create -f environment.yml && . activate YAMDA-env;
+```
+
+#### Exit Env
+`exit`
+
+#### Kill Env
+`conda env remove --name YAMDA-env`
+
 ### Docker
-Coming soon.
+1. Install docker on whatever: https://www.docker.com/community-edition
+```bash
+cd /tmp && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && sudo apt-get update && apt-cache policy docker-ce && sudo apt-get install -y docker-ce && cd -;
+```
+2. Install docker-compose on same whatever: https://docs.docker.com/compose/install
+```bash
+cd /tmp && sudo curl -L https://github.com/docker/compose/releases/download/1.18.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose && cd -;
+```
+3. Make docker image using the makefile `make yamda-dock`
+4. To have docker run the CMD you put into the Dockerfile `sudo docker run yamda-dock`
+5. To ssh into the image, for debugging and so on: `sudo docker run -it yamda-dock bash`
+6. When in the image don't forget to `source activate YAMDA-env`
+7. To kill the image and cleanup docker `make cleanup`
+
+Docker is screwy about importing global variables in your environment, which you'll probably want now or later. So far to do it easily and relatively conveniently you need to enter the variable 4 times in 3 different places, twice in the Dockerfile, once in the .env file, and once in the docker-compose.yml file. I made an example VAR to make it clear how to do that. 
 
 ---
 
