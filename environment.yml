@@ -108,5 +108,5 @@ dependencies:
   - perl=5.22.0.1=0
   - pip:
     - torch==0.4.0
-prefix: /home/darkhipo/anaconda3/envs/YAMDA-env
+prefix: /opt/anaconda3/envs/YAMDA-env
 
