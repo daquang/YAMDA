@@ -129,7 +129,7 @@ cd /tmp && wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.s
 
 #### Install Detailed
 ```bash
-conda update -yn base conda && conda update -y --prefix $HOME/anaconda3 anaconda && conda create -fmy -c defaults -c anaconda -c conda-forge -c bioconda -c pytorch -n YAMDA-env python=3.6.5 numpy=1.13.3 scipy=0.19.1 pyfaidx tqdm pytorch torchvision meme anaconda biopython pybedtools && source activate YAMDA-env;
+conda update -yn base conda && conda update -y --prefix /opt/anaconda3 anaconda && conda create -fmy -c defaults -c anaconda -c conda-forge -c bioconda -c pytorch -n YAMDA-env python=3.6.5 numpy=1.13.3 scipy=0.19.1 pyfaidx tqdm pytorch torchvision meme anaconda biopython pybedtools && source activate YAMDA-env;
 ```
 
 #### Install Easy
