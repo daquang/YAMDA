@@ -238,11 +238,10 @@ even rarer motifs smaller values (e.g. 0.025) is necessary.
 ---
 
 ## To-Do
-Here are a list of features I plan to add. They will be added according to demand.
-* Docker installation
+Here is a list of features I plan to add. They will be added according to demand.
 * Test YAMDA on RNA and protein sequences
 * Python 2.7 compatibility
 * Cythonize seeding step and reduce its memory overhead
 * Add more examples (e.g. SELEX data)
-* Add ZOOPS model
-* Add OOPS model
+* Add ZOOPS (zero or one occurrence per sequence) and OOPS (one occurrence per sequence) models. YAMDA currently only supports the TCM (two component model), whereas
+MEME supports all three. ZOOPS and OOPS may offer faster and more accurate performance for certain datasets, such as ChIP-seq.
