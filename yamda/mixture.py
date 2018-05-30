@@ -112,7 +112,8 @@ class TCM:
                 self._batch_em(X, ppms_seeds, ppms_bg_seeds, fracs_seeds, 1)
             log_likelihoods = self._compute_log_likelihood(X, ppms, ppms_bg, fracs)
             # Filter away all invalid parameter sets
-            bool_mask = (log_likelihoods != np.inf) & (fracs > min_frac) & (fracs < max_frac)
+            # Removed the right-most filter since it was causing issues for some people
+            bool_mask = (log_likelihoods != np.inf)  #& (fracs > min_frac) & (fracs < max_frac)
             indices = torch.arange(0, len(bool_mask), 1).long()
             if self.cuda:
                 indices = indices.cuda()
@@ -285,13 +286,14 @@ class TCM:
             ppms_bg_logprob = m_log_ppms_bg(x).data
             log_ratios = m_log_ratios(x).data
             ratios = torch.exp(log_ratios)
+            # Added back self.fudge here, since this is the quantity that EM is technically optimizing
             log_likelihoods.add_((log_fracs_bg + ppms_bg_logprob +
-                                  torch.log(1 + fracs_ratio * ratios)).sum(dim=0).view(-1))
+                                  torch.log(1 + self.fudge * fracs_ratio * ratios)).sum(dim=0).view(-1))
         return log_likelihoods
 
     def _erase_motif_occurrences(self, seqs_onehot, ppm, ppm_bg, frac):
-        t = np.log((1 - frac) / frac) # Threshold
-        spec = np.log(ppm) - np.log(ppm_bg) # spec matrix
+        t = np.log((1 - frac) / frac)  # Threshold
+        spec = np.log(ppm) - np.log(ppm_bg)  # spec matrix
         spec_revcomp = spec[::-1, ::-1]
         L, W = ppm.shape
         for i in trange(0, len(seqs_onehot), 1, desc='Erasing motif occurrences'):
