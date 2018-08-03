@@ -120,7 +120,30 @@ conda command:
 conda install -c bioconda pybedtools
 ```
 
-### Docker (you can ignore this part if you do not want a Docker installation)
+### Streamlined (can ignore this part if you already manually installed all dependencies)
+
+#### Anaconda Install
+```bash
+cd /tmp && wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh -O ./anaconda3.sh && bash ./anaconda3.sh -u -b -p /opt/anaconda3 && export PATH="/opt/anaconda3/bin:$PATH" && cd -;
+```
+
+#### Install Detailed
+```bash
+conda update -yn base conda && conda update -y --prefix /opt/anaconda3 anaconda && conda create -fmy -c defaults -c anaconda -c conda-forge -c bioconda -c pytorch -n YAMDA-env python=3.6.5 numpy=1.13.3 scipy=0.19.1 pyfaidx tqdm pytorch torchvision meme anaconda biopython pybedtools && source activate YAMDA-env;
+```
+
+#### Install Easy
+```bash
+conda env create -f environment.yml && . activate YAMDA-env;
+```
+
+#### Exit Env
+`source deactivate`
+
+#### Kill Env
+`conda env remove --name YAMDA-env`
+
+### Docker (can ignore this part if you do not intend on doing a Docker installation)
 1. Install docker on whatever: https://www.docker.com/community-edition
 ```bash
 cd /tmp && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && sudo apt-get update && apt-cache policy docker-ce && sudo apt-get install -y docker-ce && cd -;
@@ -208,7 +231,7 @@ python run_em.py -f 0.1 -r -e -maxs 20000 -i Examples/K562_DNase_eraseannoying.f
 ```
 
 The -f argument is one of the most difficult, yet perhaps most important, arguments. The closest corresponding argument 
-in MEME is wnsites. The closer the -f argument is to zeros, the stronger the bias towards motifs with exactly the 
+in MEME is wnsites. The closer the -f argument is to zero, the stronger the bias towards motifs with exactly the 
 expected number of sites. The default value of 0.1 works well for most ChIP-seq and some DGF datasets, but in cases of 
 even rarer motifs smaller values (e.g. 0.025) is necessary.
 
