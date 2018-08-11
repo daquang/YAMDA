@@ -1,5 +1,3 @@
-import sys
-
 import numpy as np
 from scipy import signal
 import torch
@@ -314,8 +312,8 @@ class TCM:
         return seqs
 
     def _erase_seqs_containing_motifs(self, seqs_onehot, ppm, ppm_bg, frac):
-        t = np.log((1 - frac) / frac) # Threshold
-        spec = np.log(ppm) - np.log(ppm_bg) # spec matrix
+        t = np.log((1 - frac) / frac)  # Threshold
+        spec = np.log(ppm) - np.log(ppm_bg)  # spec matrix
         spec_revcomp = spec[::-1, ::-1]
         L, W = ppm.shape
         seqs_onehot_filtered = []
@@ -325,10 +323,10 @@ class TCM:
                 seqs_onehot_filtered.append(s)
                 continue
             conv_signal = signal.convolve2d(spec, s, 'valid')[0]
-            s_has_motif = np.any(conv_signal > t)
+            s_has_motif = any(conv_signal > t)
             if self.revcomp:
                 conv_signal_revcomp = signal.convolve2d(spec_revcomp, s, 'valid')[0]
-                s_has_motif = s_has_motif or np.any(conv_signal_revcomp > t)
+                s_has_motif = s_has_motif or any(conv_signal_revcomp > t)
             if not s_has_motif:
                 seqs_onehot_filtered.append(s)
         seqs = sequences.decode(seqs_onehot_filtered, self.alpha)

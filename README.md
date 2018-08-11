@@ -53,14 +53,14 @@ Clone a copy of the YAMDA repository:
 git clone https://github.com/daquang/YAMDA.git
 ```
 
-Or download a stable release version (v0.1 should reproduce the paper's results exactly):
+Or download a stable release version (v0.1 should reproduce the paper's results exactly, but uses older libraries):
 ```
 wget https://github.com/daquang/YAMDA/archive/0.1.tar.gz
 ```
 
 YAMDA relies on several open source software packages. Links and version numbers for the packages used to develop and
 test YAMDA are listed below; however, typically any recent version of these packages should be fine for running YAMDA. 
-The best and easiest way to install all dependencies is with [Anaconda](https://www.anaconda.com/) (5.1, Python 3.6 
+The best and easiest way to install all dependencies is with [Anaconda](https://www.anaconda.com/) (5.2, Python 3.6 
 version). Anaconda uses pre-built binaries for specific operating systems to allow simple installation of Python and 
 non-Python software packages. macOS High Sierra or Ubuntu 18.04 is recommended.
 
@@ -68,20 +68,20 @@ non-Python software packages. macOS High Sierra or Ubuntu 18.04 is recommended.
 * [Python](https://www.python.org) (3.6.5). I chose Python 3.6 instead of Python 2.7 for initial YAMDA development
 because the latter will  no longer be supported in 2020. YAMDA imports the following standard Python packages:
 sys, os, errno, re, argparse, pickle, and itertools.
-* [numpy](http://www.numpy.org/) (1.13.3). Python scientific computing library. Comes pre-packaged in Anaconda.
-* [scipy](https://www.scipy.org/) (0.19.1). Python scientific computing library. Comes pre-packaged in Anaconda.
-* [pyfaidx](https://github.com/mdshw5/pyfaidx) (0.5.2). Python wrapper module for indexing, retrieval, and in-place 
+* [numpy](http://www.numpy.org/) (1.15.0). Python scientific computing library. Comes pre-packaged in Anaconda.
+* [scipy](https://www.scipy.org/) (1.1.0). Python scientific computing library. Comes pre-packaged in Anaconda.
+* [pyfaidx](https://github.com/mdshw5/pyfaidx) (0.5.4.1). Python wrapper module for indexing, retrieval, and in-place 
 modification of FASTA files using a samtools compatible index. Easily installed in Anaconda with the following command 
 line:
 ```
 pip install pyfaidx
 ```
-* [tqdm](https://pypi.python.org/pypi/tqdm) (4.19.5). Progress bar. Easily installed in Anaconda with the following 
+* [tqdm](https://pypi.python.org/pypi/tqdm) (4.24.0). Progress bar. Easily installed in Anaconda with the following 
 command line:
 ```
 pip install tqdm
 ```
-* [PyTorch](http://pytorch.org/) (0.4.0). Tensor computation library from Facebook AI that forms the backbone of YAMDA. 
+* [PyTorch](http://pytorch.org/) (0.4.1). Tensor computation library from Facebook AI that forms the backbone of YAMDA. 
 Both GPU and CPU versions are supported. It is recommended you check out the official 
 [PyTorch website](http://pytorch.org) for foolproof methods of installation for specific operating systems and hardware 
 configurations.
@@ -245,3 +245,5 @@ Here is a list of features I plan to add. They will be added according to demand
 * Add more examples (e.g. SELEX data)
 * Add ZOOPS (zero or one occurrence per sequence) and OOPS (one occurrence per sequence) models. YAMDA currently only supports the TCM (two component model), whereas
 MEME supports all three. ZOOPS and OOPS may offer faster and more accurate performance for certain datasets, such as ChIP-seq.
+
+In addition, I promise to update YAMDA as library dependencies are updated.
