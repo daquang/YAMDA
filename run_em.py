@@ -99,6 +99,11 @@ def main():
     assert 0 < fudge <= 1
     half_length = args.halflength
     motif_width = args.width
+    if 2 * half_length > motif_width:
+        print('The half length, %i, is too big for the motif width, %i. Changing half length to %i' % (half_length,
+                                                                                                       motif_width,
+                                                                                                       motif_width//2))
+        half_length = motif_width // 2
     min_sites = args.minsites
     assert min_sites > 0
     max_sites = args.maxsites
