@@ -2,12 +2,13 @@ import numpy as np
 from tqdm import trange
 from .sequences import get_rc
 
+
 def count_seqs_with_words(seqs, halflength, ming, maxg, alpha, revcomp, desc):
     if alpha == 'protein':
         ambiguous_character = 'X'
     else:
         ambiguous_character = 'N'
-    gapped_kmer_dict = {}#each key is the gapped k-mer word
+    gapped_kmer_dict = {}  # each key is the gapped k-mer word
     for g in trange(ming, maxg + 1, 1, desc=desc):
         w = g+2*halflength # length of the word
         gap = g * ambiguous_character
@@ -18,19 +19,19 @@ def count_seqs_with_words(seqs, halflength, ming, maxg, alpha, revcomp, desc):
                 # skip word if it contains an ambiguous character
                 if ambiguous_character in word:
                     continue
-                #convert word to a gapped word. Only the first and last half-length letters are preserved
+                # convert word to a gapped word. Only the first and last half-length letters are preserved
                 word = word[0:halflength] + gap + word[-halflength:]
                 update_gapped_kmer_dict(gapped_kmer_dict, word, revcomp)
     return gapped_kmer_dict
 
 
 def update_gapped_kmer_dict(gapped_kmer_dict, word, revcomp):
-    #use the lower alphabet word for rc
+    # use the lower alphabet word for rc
     if revcomp:
         word = min(word, get_rc(word))
-    if word in gapped_kmer_dict:#word has been encountered before, add 1
+    if word in gapped_kmer_dict:  # word has been encountered before, add 1
         gapped_kmer_dict[word] += 1
-    else:#word has not been encountered before, create new key
+    else:  # word has not been encountered before, create new key
         gapped_kmer_dict[word] = 1
 
 
@@ -47,7 +48,7 @@ def get_zscores(pos_seq_counts, neg_seq_counts):
     return zscores_dict
 
 
-#returns the words in order, from largest to smallest, by z-scores
+# returns the words in order, from largest to smallest, by z-scores
 def sorted_zscore_keys(zscores_dict):
     sorted_keys = sorted(zscores_dict, key=zscores_dict.__getitem__, reverse=True)
     return sorted_keys

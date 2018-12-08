@@ -6,6 +6,7 @@ from pyfaidx import Fasta
 from tqdm import tqdm
 import re
 
+
 def load_fasta_sequences(fasta_file, return_keys=False):
     """
     Reads a FASTA file and returns list of string sequences

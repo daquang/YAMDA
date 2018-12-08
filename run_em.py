@@ -104,6 +104,8 @@ def main():
                                                                                                        motif_width,
                                                                                                        motif_width//2))
         half_length = motif_width // 2
+    if args.model != 'tcm':
+        print('Only the TCM/ANR model is currently available.')
     min_sites = args.minsites
     assert min_sites > 0
     max_sites = args.maxsites
