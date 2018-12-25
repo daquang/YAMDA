@@ -149,7 +149,7 @@ class TCM:
             ppms_final.append(ppm_best[0].cpu().numpy())
             ppms_bg_final.append(ppm_bg_best[0].cpu().numpy())
             fracs_final.append(frac_best[0])
-            n_sites = M * fracs_final[-1]
+            n_sites = M * fracs_final[-1].cpu()
             if np.isnan(n_sites):
                 n_sites = 0
             else:
@@ -225,7 +225,7 @@ class TCM:
             ppms_diff_norm = (ppms - old_ppms).view(n_filters, -1).norm(p=2, dim=1)
             max_ppms_diff_norm = ppms_diff_norm.max()
             if max_ppms_diff_norm < self.tolerance:
-                pbar_epoch.set_description('Batch EM - convergence reached')
+                pbar_epoch.set_description('Batch EM - convergence reached after %i epochs' % (i+1))
                 converged = True
         fracs = fracs.view(-1)
         return ppms, ppms_bg, fracs
