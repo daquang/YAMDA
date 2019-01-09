@@ -318,19 +318,20 @@ class TCM:
 
     def _erase_motif_occurrences(self, seqs_onehot, ppm, ppm_bg, frac):
         t = np.log((1 - frac) / frac)  # Threshold
+        ppm[ppm < 1e-12] = 1e-12  # handles small probabilities
         spec = np.log(ppm) - np.log(ppm_bg)  # spec matrix
         spec_revcomp = spec[::-1, ::-1]
         L, W = ppm.shape
         for i in range(0, len(seqs_onehot), 1):
             s = seqs_onehot[i]  # grab the one hot coded sequence
             seqlen = s.shape[1]
-            if seqlen < W: # leave short sequences alone
+            if seqlen < W:  # leave short sequences alone
                 continue
             indices = np.arange(seqlen - W + 1)
-            conv_signal = signal.convolve2d(spec, s, 'valid')[0]
+            conv_signal = signal.correlate2d(spec, s, 'valid')[0]
             seq_motif_sites = indices[conv_signal > t]
             if self.revcomp:
-                conv_signal_revcomp = signal.convolve2d(spec_revcomp, s, 'valid')[0]
+                conv_signal_revcomp = signal.correlate2d(spec_revcomp, s, 'valid')[0]
                 seq_motif_sites_revcomp = indices[conv_signal_revcomp > t]
                 seq_motif_sites = np.concatenate((seq_motif_sites, seq_motif_sites_revcomp))
             for motif_site in seq_motif_sites:
@@ -340,19 +341,20 @@ class TCM:
 
     def _erase_seqs_containing_motifs(self, seqs_onehot, ppm, ppm_bg, frac):
         t = np.log((1 - frac) / frac)  # Threshold
+        ppm[ppm < 1e-12] = 1e-12  # handles small probabilities
         spec = np.log(ppm) - np.log(ppm_bg)  # spec matrix
         spec_revcomp = spec[::-1, ::-1]
         L, W = ppm.shape
         seqs_onehot_filtered = []
         for i in range(0, len(seqs_onehot), 1):
             s = seqs_onehot[i]  # grab the one hot coded sequence
-            if s.shape[1] < W: # leave short sequences alone
+            if s.shape[1] < W:  # leave short sequences alone
                 seqs_onehot_filtered.append(s)
                 continue
-            conv_signal = signal.convolve2d(spec, s, 'valid')[0]
+            conv_signal = signal.correlate2d(spec, s, 'valid')[0]
             s_has_motif = any(conv_signal > t)
             if self.revcomp:
-                conv_signal_revcomp = signal.convolve2d(spec_revcomp, s, 'valid')[0]
+                conv_signal_revcomp = signal.correlate2d(spec_revcomp, s, 'valid')[0]
                 s_has_motif = s_has_motif or any(conv_signal_revcomp > t)
             if not s_has_motif:
                 seqs_onehot_filtered.append(s)

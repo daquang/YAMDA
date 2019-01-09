@@ -66,13 +66,14 @@ def decode(seqs, alpha='dna'):
     seqs = [''.join(d[seq.max(axis=0) + seq.argmax(axis=0)]) for seq in seqs]
     return seqs
 
+
 def get_onehot_subsequences(seqs, W):
     """
     Extracts W-length subsequences from list of one-hot coded
     numpy sequences.
     Filters away subsequences overlapping invalid letters.
     """
-    subseqs = [[seq[:,i:i+W] for i in range(seq.shape[1]-W+1)] 
+    subseqs = [[seq[:, i:i+W] for i in range(seq.shape[1]-W+1)]
                 for seq in seqs]
     subseqs = list(chain(*subseqs))
     subseqs = np.array(subseqs, dtype=np.uint8)

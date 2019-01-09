@@ -72,7 +72,7 @@ def save_meme(fname, ppms, nsites=None, alpha='dna'):
 
         ppm_str = ''
         for j in range(w):
-            ppm_str += '%f %f %f %f\n' % tuple(1.0*ppm[:,j]/ppm[:,j].sum())
+            ppm_str += (' '.join(alength*['%f']) + '\n') % tuple(1.0*ppm[:,j]/ppm[:,j].sum())
         ppm_str += '\n'
         f.write(ppm_str)
 
