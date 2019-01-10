@@ -317,6 +317,7 @@ class TCM:
         return log_likelihoods
 
     def _erase_motif_occurrences(self, seqs_onehot, ppm, ppm_bg, frac):
+        frac = np.array(frac.cpu())
         t = np.log((1 - frac) / frac)  # Threshold
         ppm[ppm < 1e-12] = 1e-12  # handles small probabilities
         spec = np.log(ppm) - np.log(ppm_bg)  # spec matrix
@@ -340,6 +341,7 @@ class TCM:
         return seqs
 
     def _erase_seqs_containing_motifs(self, seqs_onehot, ppm, ppm_bg, frac):
+        frac = np.array(frac.cpu())
         t = np.log((1 - frac) / frac)  # Threshold
         ppm[ppm < 1e-12] = 1e-12  # handles small probabilities
         spec = np.log(ppm) - np.log(ppm_bg)  # spec matrix
@@ -352,10 +354,10 @@ class TCM:
                 seqs_onehot_filtered.append(s)
                 continue
             conv_signal = signal.correlate2d(spec, s, 'valid')[0]
-            s_has_motif = any(conv_signal > t)
+            s_has_motif = (conv_signal > t).any()
             if self.revcomp:
                 conv_signal_revcomp = signal.correlate2d(spec_revcomp, s, 'valid')[0]
-                s_has_motif = s_has_motif or any(conv_signal_revcomp > t)
+                s_has_motif = s_has_motif or (conv_signal_revcomp > t).any()
             if not s_has_motif:
                 seqs_onehot_filtered.append(s)
         seqs = sequences.decode(seqs_onehot_filtered, self.alpha)

@@ -68,7 +68,7 @@ non-Python software packages. macOS High Sierra or Ubuntu 18.04 is recommended.
 * [Python](https://www.python.org) (3.6.5). I chose Python 3.6 instead of Python 2.7 for initial YAMDA development
 because the latter will  no longer be supported in 2020. YAMDA imports the following standard Python packages:
 sys, os, errno, re, argparse, pickle, and itertools.
-* [numpy](http://www.numpy.org/) (1.15.0). Python scientific computing library. Comes pre-packaged in Anaconda.
+* [numpy](http://www.numpy.org/) (1.15.1). Python scientific computing library. Comes pre-packaged in Anaconda.
 * [scipy](https://www.scipy.org/) (1.1.0). Python scientific computing library. Comes pre-packaged in Anaconda.
 * [pyfaidx](https://github.com/mdshw5/pyfaidx) (0.5.4.1). Python wrapper module for indexing, retrieval, and in-place 
 modification of FASTA files using a samtools compatible index. Easily installed in Anaconda with the following command 
@@ -76,12 +76,12 @@ line:
 ```
 pip install pyfaidx
 ```
-* [tqdm](https://pypi.python.org/pypi/tqdm) (4.24.0). Progress bar. Easily installed in Anaconda with the following 
+* [tqdm](https://pypi.python.org/pypi/tqdm) (4.29.0). Progress bar. Easily installed in Anaconda with the following 
 command line:
 ```
 pip install tqdm
 ```
-* [PyTorch](http://pytorch.org/) (0.4.1). Tensor computation library from Facebook AI that forms the backbone of YAMDA. 
+* [PyTorch](http://pytorch.org/) (1.0). Tensor computation library from Facebook AI that forms the backbone of YAMDA. 
 Both GPU and CPU versions are supported. It is recommended you check out the official 
 [PyTorch website](http://pytorch.org) for foolproof methods of installation for specific operating systems and hardware 
 configurations.
